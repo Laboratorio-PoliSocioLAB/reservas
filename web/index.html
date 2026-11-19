@@ -160,20 +160,16 @@
       </div>
 
       <div class="field">
-        <label for="requesterName">Nombre y apellidos</label>
+        <label for="requesterName">Nombre y apellidos (cuenta UGR)</label>
+        <span id="nameHint" class="hint">Tomado automáticamente de tu cuenta de Google (@go.ugr.es).</span>
         <input
           type="text"
           id="requesterName"
           name="requesterName"
           required
-          minlength="2"
-          maxlength="120"
-          autocomplete="name"
-          data-error="nameError"
+          readonly
+          aria-describedby="nameHint"
         >
-        <div id="nameError" class="error-msg">
-          <span role="img" aria-label="Error">❌</span> Introduce tu nombre y apellidos.
-        </div>
       </div>
 
       <div class="field">

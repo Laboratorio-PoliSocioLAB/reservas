@@ -339,7 +339,7 @@ function openRequestDialog(slot) {
   state.selectedResource = isCapacityPool ? 'CUALITATIVO2' : slot.available[0];
 
   $('requestForm').reset();
-  $('requesterName').value = state.userName || '';
+  $('requesterName').value = state.userName || state.userEmail.split('@')[0] || '';
   $('requesterEmail').value = state.userEmail || '';
   $('requestError').hidden = true;
   const capacityText = isCapacityPool ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
@@ -348,11 +348,7 @@ function openRequestDialog(slot) {
 
   updateDurationSelect();
   $('requestDialog').showModal();
-  if ($('requesterName').value.trim()) {
-    $('purpose').focus();
-  } else {
-    $('requesterName').focus();
-  }
+  $('duration').focus();
 }
 
 async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
@@ -472,7 +468,6 @@ $('requestForm').addEventListener('submit', async (event) => {
   const errBox = $('requestError');
   errBox.hidden = true;
 
-  const nameInput = $('requesterName');
   const purposeInput = $('purpose');
 
   if (!form.checkValidity()) {
@@ -493,7 +488,7 @@ $('requestForm').addEventListener('submit', async (event) => {
     const slot = state.activeSlot;
     const hours = Number($('duration').value) || 1;
     const payload = {
-      p_name: nameInput.value.trim(),
+      p_name: state.userName || state.userEmail.split('@')[0] || '',
       p_email: state.userEmail,
       p_resource_id: state.selectedResource,
       p_date: slot.date,
