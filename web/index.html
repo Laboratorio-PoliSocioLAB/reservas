@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PoliSocioLAB · Reservas de laboratorios</title>
+  <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="masthead">
+      <div>
+        <h1>PoliSocioLAB</h1>
+        <p>Reservas de laboratorios · Facultad de Ciencias Políticas y Sociología (UGR)</p>
+      </div>
+      <img class="faculty-logo" width="490" height="130"
+        src="assets/logo-facultad.jpg"
+        alt="Facultad de Ciencias Políticas y Sociología">
+    </div>
+  </header>
+
+  <main>
+    <div id="demoBanner" class="demo-banner" hidden>
+      <strong>Modo demostración local:</strong> todavía no has conectado tu proyecto de Supabase en <code>web/config.js</code>. Puedes probar la interfaz completa con datos simulados; sigue el archivo <code>README.md</code> para activar la base de datos y los avisos reales.
+    </div>
+
+    <div class="intro-banner" role="note">
+      <strong>Cómo funciona:</strong> consulta los horarios libres (08:00–21:00, de lunes a viernes), elige laboratorio o puesto y envía tu solicitud con tu correo institucional de la UGR (dominio terminado en <strong>ugr.es</strong>). El personal de la Facultad revisará la solicitud y recibirás confirmación automática por correo.
+    </div>
+
+    <p id="status" class="notice" role="status" aria-live="polite" data-kind="info">Cargando disponibilidad…</p>
+
+    <section aria-labelledby="calendarTitle">
+      <div class="bar">
+        <h2 id="calendarTitle">Calendario de disponibilidad</h2>
+        <button id="refresh" type="button">Actualizar</button>
+      </div>
+      <div class="date-nav">
+        <button id="prev" type="button" aria-label="Semana anterior">←</button>
+        <button id="today" type="button">Hoy</button>
+        <button id="next" type="button" aria-label="Semana siguiente">→</button>
+        <label for="date" style="margin:0">Ir a fecha</label>
+        <input type="date" id="date" required>
+      </div>
+      <div id="week" class="week" aria-label="Días de la semana"></div>
+      <strong id="selectedDate"></strong>
+      <small> · Hora de Granada (Europe/Madrid)</small>
+    </section>
+
+    <div class="rooms">
+      <section aria-labelledby="radioTitle">
+        <h2 id="radioTitle">Laboratorio de radio</h2>
+        <p class="muted">Reserva del espacio completo.</p>
+        <div id="radio"><p class="muted">Cargando…</p></div>
+      </section>
+
+      <section aria-labelledby="qualOneTitle">
+        <h2 id="qualOneTitle">Laboratorio cualitativo 1</h2>
+        <p class="muted">Reserva del espacio completo.</p>
+        <div id="qualOne"><p class="muted">Cargando…</p></div>
+      </section>
+
+      <section aria-labelledby="qualTwoTitle">
+        <h2 id="qualTwoTitle">Laboratorio cualitativo 2</h2>
+        <p class="muted">10 puestos independientes (hasta 10 reservas simultáneas).</p>
+        <div id="qualTwo"><p class="muted">Cargando…</p></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
+    <span>
+      <a href="admin.html">Acceso personal (revisión)</a>
+    </span>
+  </footer>
+
+  <!-- Diálogo modal nativo (sin role="dialog" ni aria-modal redundantes) -->
+  <dialog id="requestDialog" closedby="any" aria-labelledby="requestTitle">
+    <h2 id="requestTitle">Solicitar reserva</h2>
+    <p id="requestMeta" class="muted"></p>
+
+    <form id="requestForm" novalidate>
+      <div id="seatField" class="field" hidden>
+        <label>Puesto del Laboratorio cualitativo 2</label>
+        <span class="hint">Selecciona el puesto que prefieras entre los disponibles.</span>
+        <div id="seatGrid" class="seat-grid" role="group" aria-label="Puestos disponibles"></div>
+      </div>
+
+      <div class="field">
+        <label for="duration">Duración</label>
+        <span id="durationHint" class="hint">Puedes reservar varias horas consecutivas mientras el espacio esté libre.</span>
+        <select id="duration" name="duration" required aria-describedby="durationHint"></select>
+      </div>
+
+      <div class="field">
+        <label for="requesterName">Nombre y apellidos</label>
+        <input
+          type="text"
+          id="requesterName"
+          name="requesterName"
+          required
+          minlength="2"
+          maxlength="120"
+          autocomplete="name"
+          data-error="nameError"
+        >
+        <div id="nameError" class="error-msg">
+          <span role="img" aria-label="Error">❌</span> Introduce tu nombre y apellidos.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="requesterEmail">Correo institucional UGR</label>
+        <span id="emailHint" class="hint">Debe terminar en ugr.es (por ejemplo, @go.ugr.es, @correo.ugr.es o @ugr.es).</span>
+        <input
+          type="email"
+          id="requesterEmail"
+          name="requesterEmail"
+          required
+          maxlength="120"
+          autocomplete="email"
+          placeholder="tuusuario@go.ugr.es"
+          pattern="[a-zA-Z0-9][a-zA-Z0-9._+\-]{0,63}@([a-zA-Z0-9\-]+\.)*[uU][gG][rR]\.[eE][sS]"
+          aria-describedby="emailHint"
+          data-error="emailError"
+        >
+        <div id="emailError" class="error-msg">
+          <span role="img" aria-label="Error">❌</span> Introduce un correo válido de la UGR cuyo dominio termine en ugr.es.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="purpose">Motivo o asignatura (opcional)</label>
+        <span id="purposeHint" class="hint">Ej.: práctica de radio, entrevista de TFG, grupo de discusión…</span>
+        <textarea id="purpose" name="purpose" maxlength="400" aria-describedby="purposeHint"></textarea>
+      </div>
+
+      <p id="requestError" class="notice" role="alert" data-kind="error" hidden></p>
+
+      <div class="dialog-actions">
+        <button id="cancelRequest" type="button">Cancelar</button>
+        <button id="submitRequest" type="submit" class="primary">Enviar solicitud</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de gestión · PoliSocioLAB</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="masthead">
+      <div>
+        <h1>PoliSocioLAB</h1>
+        <p>Panel de gestión del personal · Facultad de Ciencias Políticas y Sociología (UGR)</p>
+      </div>
+      <img class="faculty-logo" width="490" height="130"
+        src="assets/logo-facultad.jpg"
+        alt="Facultad de Ciencias Políticas y Sociología">
+    </div>
+  </header>
+
+  <main>
+    <div id="demoBanner" class="demo-banner" hidden>
+      <strong>Supabase no configurado:</strong> configura <code>web/config.js</code> siguiendo <code>README.md</code> para activar el acceso del personal y la gestión real de solicitudes.
+    </div>
+
+    <p id="status" class="notice" role="status" aria-live="polite" hidden></p>
+
+    <section id="loginSection" aria-labelledby="loginTitle" hidden>
+      <h2 id="loginTitle">Acceso del personal autorizado</h2>
+      <p class="muted">Inicia sesión con tu cuenta de personal registrada en PoliSocioLAB.</p>
+
+      <form id="loginForm" style="max-width:26rem">
+        <div class="field">
+          <label for="staffEmail">Correo del personal</label>
+          <input id="staffEmail" type="email" autocomplete="email" required placeholder="vcalero@go.ugr.es">
+        </div>
+        <div class="field">
+          <label for="staffPassword">Contraseña</label>
+          <input id="staffPassword" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="actions">
+          <button id="loginSubmit" type="submit" class="primary">Entrar</button>
+          <button id="magicLinkBtn" type="button">Enviar enlace de acceso por correo</button>
+        </div>
+      </form>
+    </section>
+
+    <div id="adminPanel" hidden>
+      <div class="bar">
+        <span id="staffAccount" class="muted"></span>
+        <div class="actions">
+          <a class="btn" href="index.html">Ver calendario público</a>
+          <button id="refreshAll" type="button">Actualizar</button>
+          <button id="logoutBtn" type="button">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Secciones de gestión">
+        <button id="tabPending" type="button" role="tab" aria-selected="true" aria-controls="panelPending">
+          Pendientes (<span id="pendingCount">0</span>)
+        </button>
+        <button id="tabHistory" type="button" role="tab" aria-selected="false" aria-controls="panelHistory">
+          Agenda e historial
+        </button>
+        <button id="tabBlocks" type="button" role="tab" aria-selected="false" aria-controls="panelBlocks">
+          Bloqueos de horario
+        </button>
+      </div>
+
+      <section id="panelPending" role="tabpanel" aria-labelledby="tabPending">
+        <h2>Solicitudes pendientes de revisión</h2>
+        <div id="pendingList"><p class="muted">Cargando…</p></div>
+      </section>
+
+      <section id="panelHistory" role="tabpanel" aria-labelledby="tabHistory" hidden>
+        <div class="bar">
+          <h2>Agenda e historial de reservas</h2>
+          <div class="actions">
+            <label for="statusFilter" style="margin:0">Estado</label>
+            <select id="statusFilter" style="width:auto">
+              <option value="ALL">Todos</option>
+              <option value="APROBADA">Aprobadas</option>
+              <option value="RECHAZADA">Rechazadas</option>
+              <option value="CANCELADA">Canceladas</option>
+            </select>
+          </div>
+        </div>
+        <div id="historyList"><p class="muted">Cargando…</p></div>
+      </section>
+
+      <section id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
+        <h2>Bloqueos de mantenimiento o eventos</h2>
+        <p class="muted">Impide nuevas reservas en un laboratorio completo o en un puesto concreto durante una franja horaria.</p>
+
+        <form id="blockForm" style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--line)">
+          <div class="grid-2">
+            <div class="field">
+              <label for="blockTarget">Espacio o puesto</label>
+              <select id="blockTarget" required>
+                <option value="RADIO">Laboratorio de radio</option>
+                <option value="CUALITATIVO1">Laboratorio cualitativo 1</option>
+                <option value="CUALITATIVO2">Laboratorio cualitativo 2 (todos los puestos)</option>
+                <option value="C01">Cualitativo 2 · Puesto 01</option>
+                <option value="C02">Cualitativo 2 · Puesto 02</option>
+                <option value="C03">Cualitativo 2 · Puesto 03</option>
+                <option value="C04">Cualitativo 2 · Puesto 04</option>
+                <option value="C05">Cualitativo 2 · Puesto 05</option>
+                <option value="C06">Cualitativo 2 · Puesto 06</option>
+                <option value="C07">Cualitativo 2 · Puesto 07</option>
+                <option value="C08">Cualitativo 2 · Puesto 08</option>
+                <option value="C09">Cualitativo 2 · Puesto 09</option>
+                <option value="C10">Cualitativo 2 · Puesto 10</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="blockDate">Fecha</label>
+              <input id="blockDate" type="date" required>
+            </div>
+            <div class="field">
+              <label for="blockStart">Desde</label>
+              <input id="blockStart" type="time" value="08:00" required>
+            </div>
+            <div class="field">
+              <label for="blockEnd">Hasta</label>
+              <input id="blockEnd" type="time" value="21:00" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="blockReason">Motivo (interno)</label>
+            <input id="blockReason" type="text" maxlength="200" placeholder="Ej.: mantenimiento de micrófonos, clase reservada…">
+          </div>
+          <button id="addBlockBtn" type="submit" class="primary">Añadir bloqueo</button>
+        </form>
+
+        <h3>Bloqueos activos</h3>
+        <div id="blocksList"><p class="muted">Cargando…</p></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
+    <span><a href="index.html">Volver al calendario público</a></span>
+  </footer>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
