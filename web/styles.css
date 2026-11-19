@@ -783,6 +783,116 @@ main {
 }
 
 /* ==========================================================================
+   Selector inicial de espacios (primera pantalla tras acceder)
+   ========================================================================== */
+.picker-shell {
+  max-width: 78rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.25rem max(1.5rem, env(safe-area-inset-right)) 3rem max(1.5rem, env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.picker-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.picker-head-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 44rem;
+}
+
+.picker-lead {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.picker-meta {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.space-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.space-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 150ms ease;
+}
+
+.space-card:hover {
+  border-color: var(--brand);
+}
+
+.space-card-media {
+  background: var(--ground);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.space-card-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 3;
+  object-fit: cover;
+}
+
+.space-card-body {
+  flex: 1 0 auto;
+  padding: 1.35rem 1.4rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.space-card-body h2 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.space-card-mode {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--brand-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.space-card-desc {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.space-card-foot {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.space-card-btn {
+  width: 100%;
+}
+
+/* ==========================================================================
    Espacio de trabajo operativo (Plano de Aulario · Full-bleed a ras del borde)
    ========================================================================== */
 .workspace-shell {
@@ -799,6 +909,20 @@ main {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.rail-top {
+  display: flex;
+}
+
+.rail-back-btn {
+  width: 100%;
+  justify-content: flex-start;
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+  font-size: 0.875rem;
+  padding: 0.45rem 0.8rem;
 }
 
 .rail-heading {
@@ -1188,7 +1312,7 @@ main {
   background: var(--brand);
 }
 
-/* Indicador de sala completa (Radio / Cualitativo 1) */
+/* Indicador de uso exclusivo (Radio / Cualitativo 1) */
 .room-bar {
   display: flex;
   align-items: center;
@@ -1663,6 +1787,7 @@ dialog::backdrop {
 @media (forced-colors: active) {
   .topbar,
   .sheet,
+  .space-card,
   .room-tab,
   .day-btn,
   .kpi-btn,
@@ -1724,9 +1849,26 @@ dialog::backdrop {
     border-left: 0;
     border-top: 1px solid var(--line);
   }
+
+  .space-picker-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .rail-back-btn {
+    width: auto;
+  }
 }
 
 @media (max-width: 720px) {
+  .picker-shell {
+    padding: 1.35rem max(1rem, env(safe-area-inset-right)) 2rem max(1rem, env(safe-area-inset-left));
+    gap: 1.25rem;
+  }
+
+  .space-card-body {
+    padding: 1.15rem 1.1rem 1.2rem;
+  }
   h1,
   .work-header-copy h1 {
     font-size: 1.5rem;

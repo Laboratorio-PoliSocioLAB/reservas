@@ -89,21 +89,21 @@
               <img src="assets/space-radio.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio de radio">
               <div class="gate-space-copy">
                 <strong>Laboratorio de radio</strong>
-                <span>Sala completa · Locución y control técnico</span>
+                <span>Uso exclusivo · Locución y control técnico</span>
               </div>
             </li>
             <li class="gate-space-item">
               <img src="assets/space-cualitativo1.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio cualitativo 1">
               <div class="gate-space-copy">
                 <strong>Laboratorio cualitativo 1</strong>
-                <span>Sala completa · Grupos de discusión y entrevistas</span>
+                <span>Uso exclusivo · Grupos de discusión y entrevistas</span>
               </div>
             </li>
             <li class="gate-space-item">
               <img src="assets/space-cualitativo2.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio cualitativo 2 de 10 plazas">
               <div class="gate-space-copy">
                 <strong>Laboratorio cualitativo 2</strong>
-                <span>10 plazas simultáneas · Aforo en vivo</span>
+                <span>Aforo compartido · Hasta 10 plazas simultáneas</span>
               </div>
             </li>
           </ul>
@@ -114,13 +114,78 @@
       </div>
     </div>
 
-    <!-- Espacio operativo principal: salas + semana + horarios en una sola vista -->
+    <!-- Selector inicial de espacios (primera pantalla tras iniciar sesión) -->
+    <section id="spacePicker" class="picker-shell" aria-labelledby="spacePickerTitle" hidden>
+      <div class="picker-head">
+        <div class="picker-head-copy">
+          <h1 id="spacePickerTitle" tabindex="-1">¿Qué espacio quieres utilizar?</h1>
+          <p class="picker-lead">Elige uno de los laboratorios de la Facultad para consultar los horarios disponibles y enviar tu solicitud.</p>
+        </div>
+        <p id="pickerDateMeta" class="picker-meta">Lunes a viernes · 08:00–21:00 · Turnos de 1 a 6 h</p>
+      </div>
+
+      <div class="space-picker-grid">
+        <article class="space-card">
+          <div class="space-card-media">
+            <img src="assets/space-radio.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio de radio">
+          </div>
+          <div class="space-card-body">
+            <h2>Laboratorio de radio</h2>
+            <p class="space-card-mode">Uso exclusivo · 1 reserva por turno</p>
+            <p class="space-card-desc">Cabina de locución y control técnico equipada para programas de radio, podcasts y prácticas docentes.</p>
+            <div class="space-card-foot">
+              <button type="button" class="primary space-card-btn" data-pick-room="RADIO" aria-label="Elegir y ver horarios de Laboratorio de radio">Elegir y ver horarios</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="space-card">
+          <div class="space-card-media">
+            <img src="assets/space-cualitativo1.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio cualitativo 1">
+          </div>
+          <div class="space-card-body">
+            <h2>Laboratorio cualitativo 1</h2>
+            <p class="space-card-mode">Uso exclusivo · 1 reserva por turno</p>
+            <p class="space-card-desc">Sala reservable de forma íntegra para grupos de discusión, entrevistas en profundidad y sesiones cualitativas.</p>
+            <div class="space-card-foot">
+              <button type="button" class="primary space-card-btn" data-pick-room="CUALITATIVO1" aria-label="Elegir y ver horarios de Laboratorio cualitativo 1">Elegir y ver horarios</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="space-card">
+          <div class="space-card-media">
+            <img src="assets/space-cualitativo2.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio cualitativo 2 de 10 plazas">
+          </div>
+          <div class="space-card-body">
+            <h2>Laboratorio cualitativo 2</h2>
+            <p class="space-card-mode">Aforo compartido · Hasta 10 plazas</p>
+            <p class="space-card-desc">Diez puestos individuales con asignación automática de plaza libre y disponibilidad visible por franja horaria.</p>
+            <div class="space-card-foot">
+              <button type="button" class="primary space-card-btn" data-pick-room="CUALITATIVO2" aria-label="Elegir y ver horarios de Laboratorio cualitativo 2">Elegir y ver horarios</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Espacio operativo principal: salas + semana + horarios -->
     <div id="appContent" class="workspace-shell" hidden>
       <aside class="rail" aria-label="Selector de laboratorios">
-        <div class="rail-heading">Espacios del laboratorio</div>
+        <div class="rail-top">
+          <button id="backToSpacesBtn" type="button" class="rail-back-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 12H5"/>
+              <path d="M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Todos los espacios</span>
+          </button>
+        </div>
+
+        <div class="rail-heading">Cambiar de laboratorio</div>
 
         <div id="roomSwitcher" class="room-switcher" role="group" aria-label="Elegir laboratorio">
-          <button type="button" class="room-tab" data-room="RADIO" aria-pressed="true">
+          <button type="button" class="room-tab" data-room="RADIO" aria-pressed="false">
             <span class="room-tab-head">
               <span class="room-tab-title">
                 <svg class="room-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -131,9 +196,8 @@
                 </svg>
                 <span>Laboratorio de radio</span>
               </span>
-              <span class="room-tab-count" data-room-count="RADIO">—</span>
             </span>
-            <span class="room-tab-meta">Sala completa · 08:00–21:00</span>
+            <span class="room-tab-meta">Uso exclusivo · 08:00–21:00</span>
           </button>
 
           <button type="button" class="room-tab" data-room="CUALITATIVO1" aria-pressed="false">
@@ -148,9 +212,8 @@
                 </svg>
                 <span>Laboratorio cualitativo 1</span>
               </span>
-              <span class="room-tab-count" data-room-count="CUALITATIVO1">—</span>
             </span>
-            <span class="room-tab-meta">Sala completa · 08:00–21:00</span>
+            <span class="room-tab-meta">Uso exclusivo · 08:00–21:00</span>
           </button>
 
           <button type="button" class="room-tab" data-room="CUALITATIVO2" aria-pressed="false">
@@ -164,16 +227,14 @@
                 </svg>
                 <span>Laboratorio cualitativo 2</span>
               </span>
-              <span class="room-tab-count" data-room-count="CUALITATIVO2">—</span>
             </span>
             <span class="room-tab-meta">Aforo compartido · 10 plazas</span>
-            <span id="railCualitativo2Meter" class="seat-meter compact" aria-hidden="true"></span>
           </button>
         </div>
 
         <figure class="rail-plan">
           <img id="detailSpaceImg" src="assets/space-radio.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio de radio">
-          <figcaption id="detailSpaceCaption">Cabina de locución y control técnico · Reserva de sala completa.</figcaption>
+          <figcaption id="detailSpaceCaption">Cabina de locución y control técnico · Uso exclusivo por turno.</figcaption>
         </figure>
 
         <div class="rail-rules">
@@ -189,7 +250,7 @@
           <div class="work-header">
             <div class="work-header-copy">
               <h1 id="detailSpaceTitle" tabindex="-1">Laboratorio de radio</h1>
-              <p id="detailSpaceSubtitle" class="work-header-sub">Reserva del espacio completo · Lunes a viernes, 08:00–21:00.</p>
+              <p id="detailSpaceSubtitle" class="work-header-sub">Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.</p>
             </div>
             <div class="work-toolbar">
               <div class="date-jump">

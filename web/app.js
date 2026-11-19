@@ -35,23 +35,23 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SPACE_META = {
   RADIO: {
     name: ROOM_NAMES.RADIO,
-    subtitle: 'Reserva del espacio completo · Lunes a viernes, 08:00–21:00.',
-    caption: 'Cabina de locución y control técnico · Reserva de sala completa.',
+    subtitle: 'Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.',
+    caption: 'Cabina de locución y control técnico · Uso exclusivo por turno.',
     image: 'assets/space-radio.svg',
     alt: 'Esquema arquitectónico del Laboratorio de radio',
     capacity: 1,
   },
   CUALITATIVO1: {
     name: ROOM_NAMES.CUALITATIVO1,
-    subtitle: 'Reserva del espacio completo · Lunes a viernes, 08:00–21:00.',
-    caption: 'Sala de grupos de discusión y entrevistas · Reserva de sala completa.',
+    subtitle: 'Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.',
+    caption: 'Sala de grupos de discusión y entrevistas · Uso exclusivo por turno.',
     image: 'assets/space-cualitativo1.svg',
     alt: 'Esquema arquitectónico del Laboratorio cualitativo 1',
     capacity: 1,
   },
   CUALITATIVO2: {
     name: ROOM_NAMES.CUALITATIVO2,
-    subtitle: 'Aforo máximo de 10 plazas simultáneas · Lunes a viernes, 08:00–21:00.',
+    subtitle: 'Aforo compartido de 10 plazas simultáneas · Lunes a viernes, 08:00–21:00.',
     caption: '10 puestos individuales con asignación automática de plaza libre.',
     image: 'assets/space-cualitativo2.svg',
     alt: 'Esquema arquitectónico del Laboratorio cualitativo 2 de 10 plazas',
@@ -157,7 +157,7 @@ function readInitialUrlParams() {
   const room = params.get('room');
   const date = params.get('date');
   return {
-    room: room && SPACE_META[room] ? room : 'RADIO',
+    room: room && SPACE_META[room] ? room : '',
     date: date && ISO_DATE_RE.test(date) ? date : '',
   };
 }
@@ -177,15 +177,23 @@ const state = {
   userName: '',
 };
 
-function syncUrlState() {
+function syncUrlState({ push = false } = {}) {
   const current = new URLSearchParams(window.location.search);
   if (current.has('code') || current.has('error')) return;
   const next = new URLSearchParams();
-  if (state.selectedRoom) next.set('room', state.selectedRoom);
-  if (state.date) next.set('date', state.date);
+  if (state.selectedRoom) {
+    next.set('room', state.selectedRoom);
+    if (state.date) next.set('date', state.date);
+  }
   const query = next.toString();
   const target = query ? `${window.location.pathname}?${query}` : window.location.pathname;
-  window.history.replaceState(null, '', target);
+  const currentFull = `${window.location.pathname}${window.location.search}`;
+  if (target === currentFull) return;
+  if (push) {
+    window.history.pushState(null, '', target);
+  } else {
+    window.history.replaceState(null, '', target);
+  }
 }
 
 function setStatus(message, kind = 'info') {
@@ -226,9 +234,31 @@ function showAuthGate(message = '', kind = 'info') {
   state.userName = '';
   $('topbarSession').hidden = true;
   $('authGate').hidden = false;
+  $('spacePicker').hidden = true;
   $('appContent').hidden = true;
+  document.title = 'Reservas de laboratorios · PoliSocioLAB (UGR)';
   if ($('requestDialog').open) $('requestDialog').close();
   setStatus(message, kind);
+}
+
+function renderActiveView({ focusHeading = false } = {}) {
+  const hasRoom = Boolean(state.selectedRoom && SPACE_META[state.selectedRoom]);
+  $('authGate').hidden = true;
+  $('spacePicker').hidden = hasRoom;
+  $('appContent').hidden = !hasRoom;
+
+  if (hasRoom) {
+    updateRoomHeader();
+    updateRoomRailMeta();
+    if (state.date) {
+      renderWeek();
+      renderSelectedRoomSlots();
+    }
+    if (focusHeading) $('detailSpaceTitle').focus();
+  } else {
+    document.title = 'Reservas de laboratorios · PoliSocioLAB (UGR)';
+    if (focusHeading) $('spacePickerTitle').focus();
+  }
 }
 
 function showAppForUser(email, fullName = '', avatarUrl = '') {
@@ -242,8 +272,7 @@ function showAppForUser(email, fullName = '', avatarUrl = '') {
     email,
   });
   $('topbarSession').hidden = false;
-  $('authGate').hidden = true;
-  $('appContent').hidden = false;
+  renderActiveView();
 }
 
 function renderSlotsSkeleton() {
@@ -278,37 +307,16 @@ function fillSeatMeterCells(container, availableCount, total = 10) {
 
 function updateRoomRailMeta() {
   for (const roomKey of Object.keys(SPACE_META)) {
-    const badge = document.querySelector(`[data-room-count="${roomKey}"]`);
     const btn = document.querySelector(`.room-tab[data-room="${roomKey}"]`);
     if (btn) {
       btn.setAttribute('aria-pressed', roomKey === state.selectedRoom ? 'true' : 'false');
-    }
-    const roomSlots = state.slots.filter((s) => s.room === roomKey);
-    if (badge) {
-      if (!roomSlots.length) {
-        badge.textContent = 'Cerrado';
-      } else {
-        const openCount = roomSlots.filter((s) => Array.isArray(s.available) && s.available.length > 0).length;
-        badge.textContent = openCount === 1 ? '1 libre' : `${openCount} libres`;
-      }
-    }
-    if (roomKey === 'CUALITATIVO2') {
-      const railMeter = $('railCualitativo2Meter');
-      if (railMeter) {
-        const avgFree = roomSlots.length
-          ? Math.round(
-              roomSlots.reduce((sum, s) => sum + (Array.isArray(s.available) ? s.available.length : 0), 0) /
-                roomSlots.length
-            )
-          : 0;
-        fillSeatMeterCells(railMeter, avgFree, 10);
-      }
     }
   }
 }
 
 function updateRoomHeader() {
-  const meta = SPACE_META[state.selectedRoom] || SPACE_META.RADIO;
+  const meta = SPACE_META[state.selectedRoom];
+  if (!meta) return;
   $('detailSpaceTitle').textContent = meta.name;
   $('detailSpaceSubtitle').textContent = meta.subtitle;
   $('detailSpaceImg').src = meta.image;
@@ -371,11 +379,12 @@ function renderSelectedRoomSlots() {
 
   const list = state.slots.filter((s) => s.room === roomKey);
   const isCapacityPool = roomKey === 'CUALITATIVO2';
-  const openSlots = list.filter((s) => s.available.length > 0).length;
 
   $('slotsSummary').textContent = list.length
-    ? `${openSlots} de ${list.length} franjas con disponibilidad`
-    : 'Sin franjas abiertas';
+    ? isCapacityPool
+      ? 'Horario 08:00–21:00 · Hasta 10 plazas por franja'
+      : 'Horario 08:00–21:00 · Uso exclusivo por franja'
+    : 'Cerrado este día';
 
   if (!list.length) {
     const empty = document.createElement('div');
@@ -425,7 +434,7 @@ function renderSelectedRoomSlots() {
       track.className = freeCount ? 'room-bar-track' : 'room-bar-track is-full';
       track.setAttribute('aria-hidden', 'true');
       const desc = document.createElement('span');
-      desc.textContent = freeCount ? 'Sala completa' : 'Sala ocupada o bloqueada';
+      desc.textContent = freeCount ? 'Uso exclusivo' : 'Reservado o bloqueado';
       bar.append(track, desc);
       visualEl.appendChild(bar);
     }
@@ -433,11 +442,11 @@ function renderSelectedRoomSlots() {
     const capEl = document.createElement('div');
     capEl.className = 'slot-capacity';
     if (isCapacityPool) {
-      capEl.textContent = `${freeCount} / 10 plazas`;
+      capEl.textContent = freeCount ? `${freeCount} / 10 plazas` : '0 / 10 plazas';
       if (freeCount === 0) capEl.classList.add('is-full');
       else if (freeCount <= 3) capEl.classList.add('is-low');
     } else {
-      capEl.textContent = freeCount ? 'Disponible' : 'Ocupado';
+      capEl.textContent = freeCount ? 'Libre' : '';
       if (!freeCount) capEl.classList.add('is-full');
     }
 
@@ -447,7 +456,7 @@ function renderSelectedRoomSlots() {
       const tag = document.createElement('span');
       tag.className = 'status-tag';
       tag.dataset.state = 'COMPLETO';
-      tag.textContent = 'Completo';
+      tag.textContent = isCapacityPool ? 'Sin plazas' : 'Ocupado';
       actionEl.appendChild(tag);
     } else {
       const btn = document.createElement('button');
@@ -469,13 +478,20 @@ function renderSelectedRoomSlots() {
   box.appendChild(ul);
 }
 
-function selectRoom(roomKey) {
+function selectRoom(roomKey, { pushHistory = false, focusHeading = false } = {}) {
   if (!SPACE_META[roomKey]) return;
   state.selectedRoom = roomKey;
-  updateRoomHeader();
-  updateRoomRailMeta();
-  renderSelectedRoomSlots();
-  syncUrlState();
+  renderActiveView({ focusHeading });
+  syncUrlState({ push: pushHistory });
+  if (!state.slots.length && !state.date) {
+    loadDay('');
+  }
+}
+
+function showSpacePicker({ pushHistory = true, focusHeading = true } = {}) {
+  state.selectedRoom = '';
+  renderActiveView({ focusHeading });
+  syncUrlState({ push: pushHistory });
 }
 
 function updatePurposeCounter() {
@@ -527,7 +543,9 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
   if (!bannerMessage) {
     setStatus('');
   }
-  renderSlotsSkeleton();
+  if (state.selectedRoom) {
+    renderSlotsSkeleton();
+  }
 
   try {
     let data;
@@ -547,10 +565,12 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
     state.lastDate = data.last_date;
     state.slots = data.slots || [];
 
-    updateRoomHeader();
-    updateRoomRailMeta();
-    renderWeek();
-    renderSelectedRoomSlots();
+    if (state.selectedRoom) {
+      updateRoomHeader();
+      updateRoomRailMeta();
+      renderWeek();
+      renderSelectedRoomSlots();
+    }
     syncUrlState();
     setStatus(bannerMessage, bannerKind);
   } catch (err) {
@@ -597,7 +617,7 @@ async function syncAuthSession(session) {
 
   const fullName = getGoogleIdentityDisplayName(session.user);
   const avatarUrl = getSafeGoogleAvatarUrl(session.user);
-  const sameUser = state.userEmail === email && !$('appContent').hidden;
+  const sameUser = state.userEmail === email && $('authGate').hidden;
 
   showAppForUser(email, fullName, avatarUrl);
   if (!sameUser) {
@@ -641,9 +661,38 @@ $('logoutBtn').addEventListener('click', async () => {
   showAuthGate('Has cerrado sesión. Puedes volver a entrar con tu cuenta @go.ugr.es.', 'info');
 });
 
+for (const btn of document.querySelectorAll('[data-pick-room]')) {
+  btn.addEventListener('click', () =>
+    selectRoom(btn.dataset.pickRoom, { pushHistory: true, focusHeading: true })
+  );
+}
+
 for (const btn of document.querySelectorAll('.room-tab[data-room]')) {
   btn.addEventListener('click', () => selectRoom(btn.dataset.room));
 }
+
+$('backToSpacesBtn').addEventListener('click', () =>
+  showSpacePicker({ pushHistory: true, focusHeading: true })
+);
+
+const brandLink = document.querySelector('.brand-wordmark');
+if (brandLink) {
+  brandLink.addEventListener('click', (event) => {
+    if (!state.userEmail) return;
+    event.preventDefault();
+    showSpacePicker({ pushHistory: true, focusHeading: true });
+  });
+}
+
+window.addEventListener('popstate', () => {
+  if (!state.userEmail) return;
+  const next = readInitialUrlParams();
+  state.selectedRoom = next.room;
+  if (next.date && next.date !== state.date) {
+    loadDay(clampDate(next.date));
+  }
+  renderActiveView({ focusHeading: false });
+});
 
 $('purpose').addEventListener('input', updatePurposeCounter);
 

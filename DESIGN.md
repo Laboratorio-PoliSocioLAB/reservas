@@ -155,7 +155,7 @@ components:
 
 Plano de Aulario treats laboratory booking as a European university architectural schedule rather than a multi-step SaaS dashboard. The institutional burnt-orange header of the Facultad de Ciencias Políticas y Sociología (UGR) anchors every screen, holding the official Faculty emblem inside a crisp white plaque while keeping the operational surface calm, legible, and fast under campus daylight and mobile thumbs.
 
-Beneath the header, a flush left mineral rail holds the three laboratories (Laboratorio de radio, Laboratorio cualitativo 1, and Laboratorio cualitativo 2) together with live availability counts and schematic floorplans, while the right-hand daylight canvas displays a 7-day week bar and a 1px-ruled hourly timetable from 08:00 to 21:00. Instead of generic floating cards, shadows, or decorative marketing copy, clarity comes from crisp hairline borders, tabular numerals, and a signature 10-segment occupancy meter that lets students and staff read room capacity in a single glance.
+Beneath the header, authenticated users first choose which laboratory to book from a flat 3-column architectural space picker (Laboratorio de radio, Laboratorio cualitativo 1, and Laboratorio cualitativo 2). Entering a space opens a flush left mineral rail holding quick room switching, a return button to all spaces, and schematic floorplans, while the right-hand daylight canvas displays a 7-day week bar and a 1px-ruled hourly timetable from 08:00 to 21:00. Instead of generic floating cards, shadows, or decorative marketing copy, clarity comes from crisp hairline borders, tabular numerals, and a signature 10-segment occupancy meter that lets students and staff read room capacity in a single glance.
 
 The system explicitly rejects generic SaaS chrome: no warm-beige AI backdrops, no nested cards inside cards, no colored left-accent stripes on rounded containers, and no drop shadows on resting surfaces.
 
@@ -278,7 +278,7 @@ High-contrast, zoom-safe controls with clear focus ownership and non-intrusive v
 ### Ten-Seat Occupancy Meter
 The signature architectural component for `Laboratorio cualitativo 2` (10 concurrent seats), rendered both inside every hourly timetable row and in compact `6px`-tall form inside the left rail tab.
 - **Geometry:** 10-column equal CSS Grid (`gap: 3px`, `max-width: 14rem` in rows, `100%` in compact rail mode) of crisp `8px`-tall (`6px` compact) `2px`-radius blocks.
-- **Color Encoding:** Open seats render in Capacity Teal (`#0E6A52`) when ≥4 seats remain, shift to Faculty Orange (`#B84408`) when 1–3 seats remain (scarcity signal), and turn neutral slate (`#D8DCE4`) when occupied. Paired always with a right-aligned tabular numeric readout (`6/10 libres`, `2/10 libres`, `Completo`) so color is never the sole carrier of meaning.
+- **Color Encoding:** Open seats render in Capacity Teal (`#0E6A52`) when ≥4 seats remain, shift to Faculty Orange (`#B84408`) when 1–3 seats remain (scarcity signal), and turn neutral slate (`#D8DCE4`) when occupied. Paired always with a right-aligned tabular numeric readout (`6 / 10 plazas`, `2 / 10 plazas`, `Sin plazas`) so color is never the sole carrier of meaning.
 
 ## Do's and Don'ts
 

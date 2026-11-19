@@ -174,6 +174,10 @@ test('frontend evita CDNs externos, inline styles, innerHTML y window.prompt', (
     assert.doesNotMatch(html, /fonts\.googleapis\.com/);
   }
 
+  assert.match(indexHtml, /id="spacePicker"/);
+  assert.match(indexHtml, /id="backToSpacesBtn"/);
+  assert.doesNotMatch(indexHtml, /sala completa/i);
+  assert.doesNotMatch(appJs, /sala completa/i);
   assert.match(adminHtml, /<dialog id="cancelDialog"/);
   assert.match(adminHtml, /<dialog id="deleteBlockDialog"/);
   const adminHtmlNoComments = adminHtml.replace(/<!--[\s\S]*?-->/g, '');

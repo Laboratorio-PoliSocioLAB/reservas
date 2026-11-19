@@ -25,7 +25,7 @@ const supabase = configured
 
 const TARGET_LABELS = {
   ...RESOURCE_LABELS,
-  CUALITATIVO2: 'Laboratorio cualitativo 2 (aforo completo)',
+  CUALITATIVO2: 'Laboratorio cualitativo 2 (todas las plazas)',
 };
 
 const STATUS_LABELS = {
