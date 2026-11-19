@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ilustración provisional del Laboratorio de radio">
+  <defs>
+    <linearGradient id="bgRadio" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34231d"/>
+      <stop offset="100%" stop-color="#5a392c"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bgRadio)"/>
+  <circle cx="400" cy="220" r="145" fill="#f37020" fill-opacity="0.14"/>
+  <circle cx="400" cy="220" r="102" fill="#f37020" fill-opacity="0.22"/>
+  <g fill="none" stroke="#ffe0cc" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="364" y="130" width="72" height="122" rx="36" fill="#f37020" stroke="#ffffff"/>
+    <line x1="382" y1="168" x2="418" y2="168" stroke="#ffffff" stroke-width="6"/>
+    <line x1="382" y1="190" x2="418" y2="190" stroke="#ffffff" stroke-width="6"/>
+    <line x1="382" y1="212" x2="418" y2="212" stroke="#ffffff" stroke-width="6"/>
+    <path d="M334 218a66 66 0 0 0 132 0"/>
+    <line x1="400" y1="284" x2="400" y2="334"/>
+    <line x1="358" y1="334" x2="442" y2="334"/>
+    <path d="M294 176a120 120 0 0 0 0 88" stroke="#f37020" stroke-width="8"/>
+    <path d="M506 176a120 120 0 0 1 0 88" stroke="#f37020" stroke-width="8"/>
+  </g>
+  <text x="400" y="422" text-anchor="middle" fill="#ffe0cc" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="600" letter-spacing="0.04em">FOTO PENDIENTE · LABORATORIO DE RADIO</text>
+</svg>

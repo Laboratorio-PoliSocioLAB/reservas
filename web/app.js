@@ -19,6 +19,27 @@ const $ = (id) => document.getElementById(id);
 const demoMode = !isConfigured();
 const supabase = demoMode ? null : createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
+const SPACE_META = {
+  RADIO: {
+    name: ROOM_NAMES.RADIO,
+    subtitle: 'Reserva del espacio completo · Lunes a viernes, 08:00–21:00.',
+    image: 'assets/space-radio.svg',
+    alt: 'Laboratorio de radio de PoliSocioLAB',
+  },
+  CUALITATIVO1: {
+    name: ROOM_NAMES.CUALITATIVO1,
+    subtitle: 'Reserva del espacio completo · Lunes a viernes, 08:00–21:00.',
+    image: 'assets/space-cualitativo1.svg',
+    alt: 'Laboratorio cualitativo 1 de PoliSocioLAB',
+  },
+  CUALITATIVO2: {
+    name: ROOM_NAMES.CUALITATIVO2,
+    subtitle: 'Aforo máximo de 10 plazas · Lunes a viernes, 08:00–21:00.',
+    image: 'assets/space-cualitativo2.svg',
+    alt: 'Laboratorio cualitativo 2 de PoliSocioLAB',
+  },
+};
+
 // Datos simulados solo cuando Supabase aún no está configurado en config.js
 const demoState = {
   bookings: [],
@@ -60,6 +81,7 @@ function buildDemoAvailability(requestedDate) {
 }
 
 const state = {
+  selectedRoom: '',
   date: '',
   today: '',
   lastDate: '',
@@ -93,9 +115,17 @@ function getCleanRedirectUrl() {
   return window.location.origin + window.location.pathname;
 }
 
+function clearTransitionNames() {
+  document.querySelectorAll('.space-card > img').forEach((img) => {
+    img.style.viewTransitionName = '';
+  });
+  $('detailSpaceImg').style.viewTransitionName = '';
+}
+
 function showAuthGate(message = '', kind = 'info') {
   state.userEmail = '';
   state.userName = '';
+  state.selectedRoom = '';
   $('authGate').hidden = false;
   $('appContent').hidden = true;
   if ($('requestDialog').open) $('requestDialog').close();
@@ -142,11 +172,14 @@ function renderWeek() {
   $('next').disabled = addDays(first, 7) > state.lastDate;
 }
 
-function renderRoom(containerId, roomKey) {
-  const box = $(containerId);
+function renderSelectedRoomSlots() {
+  const box = $('spaceSlots');
   box.innerHTML = '';
+  const roomKey = state.selectedRoom;
+  if (!roomKey) return;
+
   const list = state.slots.filter((s) => s.room === roomKey);
-  const isMultiSeat = roomKey === 'CUALITATIVO2';
+  const isCapacityPool = roomKey === 'CUALITATIVO2';
 
   if (!list.length) {
     const p = document.createElement('p');
@@ -165,7 +198,7 @@ function renderRoom(containerId, roomKey) {
     title.textContent = `${slot.start} – ${slot.end}`;
     const meta = document.createElement('span');
     meta.className = 'muted';
-    if (isMultiSeat) {
+    if (isCapacityPool) {
       meta.textContent =
         slot.available.length === 1
           ? '1 de 10 plazas libres'
@@ -199,6 +232,79 @@ function renderRoom(containerId, roomKey) {
   }
 }
 
+function openSpaceDetail(roomKey) {
+  const meta = SPACE_META[roomKey];
+  if (!meta) return;
+
+  state.selectedRoom = roomKey;
+  const cardImg = document.querySelector(`.space-card[data-room="${roomKey}"] > img`);
+  const detailImg = $('detailSpaceImg');
+
+  const applyView = () => {
+    detailImg.src = meta.image;
+    detailImg.alt = meta.alt;
+    $('detailSpaceTitle').textContent = meta.name;
+    $('detailSpaceSubtitle').textContent = meta.subtitle;
+    $('spaceMenuView').hidden = true;
+    $('spaceDetailView').hidden = false;
+    if (state.slots.length) {
+      renderWeek();
+      renderSelectedRoomSlots();
+    }
+  };
+
+  clearTransitionNames();
+  if (!document.startViewTransition) {
+    applyView();
+    $('detailSpaceTitle').focus();
+  } else {
+    if (cardImg) cardImg.style.viewTransitionName = 'selected-space-photo';
+    const transition = document.startViewTransition(() => {
+      if (cardImg) cardImg.style.viewTransitionName = '';
+      detailImg.style.viewTransitionName = 'selected-space-photo';
+      applyView();
+    });
+    transition.finished.finally(() => {
+      clearTransitionNames();
+      $('detailSpaceTitle').focus();
+    });
+  }
+
+  loadDay(state.date || '');
+}
+
+function returnToSpaceMenu() {
+  const previousRoom = state.selectedRoom;
+  const cardImg = previousRoom
+    ? document.querySelector(`.space-card[data-room="${previousRoom}"] > img`)
+    : null;
+  const detailImg = $('detailSpaceImg');
+
+  const applyView = () => {
+    state.selectedRoom = '';
+    $('spaceDetailView').hidden = true;
+    $('spaceMenuView').hidden = false;
+    setStatus('');
+  };
+
+  clearTransitionNames();
+  if (!document.startViewTransition) {
+    applyView();
+    $('spaceMenuTitle').focus();
+  } else {
+    detailImg.style.viewTransitionName = 'selected-space-photo';
+    const transition = document.startViewTransition(() => {
+      detailImg.style.viewTransitionName = '';
+      if (cardImg) cardImg.style.viewTransitionName = 'selected-space-photo';
+      applyView();
+    });
+    transition.finished.finally(() => {
+      clearTransitionNames();
+      $('spaceMenuTitle').focus();
+    });
+  }
+}
+
 function updateDurationSelect() {
   const slot = state.activeSlot;
   if (!slot || !state.selectedResource) return;
@@ -221,14 +327,14 @@ function updateDurationSelect() {
 
 function openRequestDialog(slot) {
   state.activeSlot = slot;
-  const isMultiSeat = slot.room === 'CUALITATIVO2';
-  state.selectedResource = isMultiSeat ? 'CUALITATIVO2' : slot.available[0];
+  const isCapacityPool = slot.room === 'CUALITATIVO2';
+  state.selectedResource = isCapacityPool ? 'CUALITATIVO2' : slot.available[0];
 
   $('requestForm').reset();
   $('requesterName').value = state.userName || '';
   $('requesterEmail').value = state.userEmail || '';
   $('requestError').hidden = true;
-  const capacityText = isMultiSeat ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
+  const capacityText = isCapacityPool ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
   $('requestMeta').textContent =
     `${ROOM_NAMES[slot.room]} · ${formatDateShortEs(slot.date)} · inicio a las ${slot.start}${capacityText}`;
 
@@ -263,10 +369,10 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
     state.lastDate = data.last_date;
     state.slots = data.slots || [];
 
-    renderWeek();
-    renderRoom('radio', 'RADIO');
-    renderRoom('qualOne', 'CUALITATIVO1');
-    renderRoom('qualTwo', 'CUALITATIVO2');
+    if (state.selectedRoom) {
+      renderWeek();
+      renderSelectedRoomSlots();
+    }
     setStatus(bannerMessage, bannerKind);
   } catch (err) {
     if (seq !== state.loadSeq) return;
@@ -280,7 +386,9 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
 async function syncAuthSession(session) {
   if (demoMode) {
     showAppForUser('demo@go.ugr.es', 'Usuario demo');
-    await loadDay('');
+    $('spaceMenuView').hidden = false;
+    $('spaceDetailView').hidden = true;
+    setStatus('');
     return;
   }
 
@@ -301,11 +409,14 @@ async function syncAuthSession(session) {
 
   const meta = session.user.user_metadata || {};
   const fullName = String(meta.full_name || meta.name || '').trim();
-  const alreadyLoadedSameUser = state.userEmail === email && !$('appContent').hidden;
+  const sameUser = state.userEmail === email && !$('appContent').hidden;
 
   showAppForUser(email, fullName);
-  if (!alreadyLoadedSameUser) {
-    await loadDay('');
+  if (!sameUser) {
+    state.selectedRoom = '';
+    $('spaceMenuView').hidden = false;
+    $('spaceDetailView').hidden = true;
+    setStatus('');
   }
 }
 
@@ -339,6 +450,12 @@ $('logoutBtn').addEventListener('click', async () => {
   await supabase.auth.signOut();
   showAuthGate('Has cerrado sesión. Puedes volver a entrar con tu cuenta @go.ugr.es.', 'info');
 });
+
+for (const btn of document.querySelectorAll('.card-action[data-room]')) {
+  btn.addEventListener('click', () => openSpaceDetail(btn.dataset.room));
+}
+
+$('backToSpaces').addEventListener('click', returnToSpaceMenu);
 
 $('requestForm').addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -380,6 +497,7 @@ $('requestForm').addEventListener('submit', async (event) => {
     if (demoMode) {
       const endHour = Number(slot.start.slice(0, 2)) + hours;
       const end = String(endHour).padStart(2, '0') + ':00';
+      const assigned = state.selectedResource === 'CUALITATIVO2' ? slot.available[0] : state.selectedResource;
       created = {
         id: 'demo-' + Math.random().toString(36).slice(2, 10),
         resource_label: RESOURCE_LABELS[state.selectedResource] || state.selectedResource,
@@ -390,7 +508,7 @@ $('requestForm').addEventListener('submit', async (event) => {
       };
       demoState.bookings.push({
         id: created.id,
-        resource_id: state.selectedResource,
+        resource_id: assigned,
         date: slot.date,
         start: slot.start,
         end,

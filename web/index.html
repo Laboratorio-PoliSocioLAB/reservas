@@ -35,8 +35,7 @@
         Granada con cuenta institucional <strong>@go.ugr.es</strong>.
       </p>
       <p class="muted">
-        Inicia sesión con Google seleccionando tu cuenta <code>@go.ugr.es</code> para ver la disponibilidad
-        en tiempo real (08:00–21:00, de lunes a viernes) y enviar solicitudes de reserva.
+        Inicia sesión con Google seleccionando tu cuenta <code>@go.ugr.es</code> para elegir espacio, consultar disponibilidad y solicitar reserva.
       </p>
       <div class="actions">
         <button id="googleLoginBtn" type="button" class="primary google-btn">
@@ -64,43 +63,73 @@
         </div>
       </div>
 
-      <div class="intro-banner" role="note">
-        <strong>Cómo funciona:</strong> consulta los horarios libres (08:00–21:00, de lunes a viernes), elige laboratorio y envía tu solicitud. El personal de la Facultad revisará la solicitud y recibirás confirmación automática en tu correo <strong>@go.ugr.es</strong>.
-      </div>
+      <!-- Paso 1: Menú de selección de espacio con fotos -->
+      <section id="spaceMenuView" class="space-menu-section" aria-labelledby="spaceMenuTitle">
+        <h2 id="spaceMenuTitle" tabindex="-1">Selecciona un espacio</h2>
+        <p class="muted">Elige el laboratorio que quieres reservar para consultar sus fechas y horarios disponibles.</p>
 
-      <section aria-labelledby="calendarTitle">
-        <div class="bar">
-          <h2 id="calendarTitle">Calendario de disponibilidad</h2>
-          <button id="refresh" type="button">Actualizar</button>
+        <div class="space-grid">
+          <article class="space-card" data-room="RADIO">
+            <img src="assets/space-radio.svg" width="800" height="500" alt="Laboratorio de radio de PoliSocioLAB">
+            <h3>Laboratorio de radio</h3>
+            <p class="muted">Reserva del espacio completo · Lunes a viernes, 08:00–21:00.</p>
+            <footer>
+              <button type="button" class="primary card-action" data-room="RADIO">Elegir fecha y hora</button>
+            </footer>
+          </article>
+
+          <article class="space-card" data-room="CUALITATIVO1">
+            <img src="assets/space-cualitativo1.svg" width="800" height="500" alt="Laboratorio cualitativo 1 de PoliSocioLAB">
+            <h3>Laboratorio cualitativo 1</h3>
+            <p class="muted">Reserva del espacio completo · Lunes a viernes, 08:00–21:00.</p>
+            <footer>
+              <button type="button" class="primary card-action" data-room="CUALITATIVO1">Elegir fecha y hora</button>
+            </footer>
+          </article>
+
+          <article class="space-card" data-room="CUALITATIVO2">
+            <img src="assets/space-cualitativo2.svg" width="800" height="500" alt="Laboratorio cualitativo 2 de PoliSocioLAB">
+            <h3>Laboratorio cualitativo 2</h3>
+            <p class="muted">Aforo máximo de 10 plazas · Lunes a viernes, 08:00–21:00.</p>
+            <footer>
+              <button type="button" class="primary card-action" data-room="CUALITATIVO2">Elegir fecha y hora</button>
+            </footer>
+          </article>
         </div>
-        <div class="date-nav">
-          <button id="prev" type="button" aria-label="Semana anterior">←</button>
-          <button id="today" type="button">Hoy</button>
-          <button id="next" type="button" aria-label="Semana siguiente">→</button>
-          <label for="date" style="margin:0">Ir a fecha</label>
-          <input type="date" id="date" required>
-        </div>
-        <div id="week" class="week" aria-label="Días de la semana"></div>
-        <strong id="selectedDate"></strong>
       </section>
 
-      <div class="rooms">
-        <section aria-labelledby="radioTitle">
-          <h2 id="radioTitle">Laboratorio de radio</h2>
-          <p class="muted">Reserva del espacio completo.</p>
-          <div id="radio"><p class="muted">Cargando…</p></div>
+      <!-- Paso 2: Calendario y horarios del espacio elegido -->
+      <div id="spaceDetailView" hidden>
+        <section class="space-detail-hero" aria-labelledby="detailSpaceTitle">
+          <div class="bar">
+            <button id="backToSpaces" type="button">← Cambiar espacio</button>
+            <button id="refresh" type="button">Actualizar</button>
+          </div>
+          <div class="space-detail-header">
+            <img id="detailSpaceImg" src="assets/space-radio.svg" width="800" height="500" alt="">
+            <div>
+              <h2 id="detailSpaceTitle" tabindex="-1"></h2>
+              <p id="detailSpaceSubtitle" class="muted"></p>
+            </div>
+          </div>
         </section>
 
-        <section aria-labelledby="qualOneTitle">
-          <h2 id="qualOneTitle">Laboratorio cualitativo 1</h2>
-          <p class="muted">Reserva del espacio completo.</p>
-          <div id="qualOne"><p class="muted">Cargando…</p></div>
+        <section aria-labelledby="calendarTitle">
+          <h3 id="calendarTitle">Fecha</h3>
+          <div class="date-nav">
+            <button id="prev" type="button" aria-label="Semana anterior">←</button>
+            <button id="today" type="button">Hoy</button>
+            <button id="next" type="button" aria-label="Semana siguiente">→</button>
+            <label for="date" style="margin:0">Ir a fecha</label>
+            <input type="date" id="date" required>
+          </div>
+          <div id="week" class="week" aria-label="Días de la semana"></div>
+          <strong id="selectedDate"></strong>
         </section>
 
-        <section aria-labelledby="qualTwoTitle">
-          <h2 id="qualTwoTitle">Laboratorio cualitativo 2</h2>
-          <p class="muted">Aforo máximo de 10 plazas (hasta 10 reservas simultáneas).</p>
-          <div id="qualTwo"><p class="muted">Cargando…</p></div>
+        <section aria-labelledby="slotsTitle">
+          <h3 id="slotsTitle">Horarios disponibles</h3>
+          <div id="spaceSlots" class="slot-grid"><p class="muted">Cargando…</p></div>
         </section>
       </div>
     </div>
