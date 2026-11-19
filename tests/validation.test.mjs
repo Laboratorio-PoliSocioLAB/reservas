@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   isValidUgrEmail,
+  isValidGoUgrEmail,
   computeConsecutiveHours,
   addDays,
   mondayOf,
@@ -86,4 +87,22 @@ test('migración SQL y Edge Function existen y contienen restricciones críticas
   assert.match(fn, /BEGIN:VCALENDAR/);
   assert.match(fn, /api\.brevo\.com/);
   assert.match(fn, /staff_users/);
+
+  const sqlAuth = fs.readFileSync(
+    path.join(root, 'supabase/migrations/003_require_go_ugr_google_auth.sql'),
+    'utf8'
+  );
+  assert.match(sqlAuth, /is_valid_go_ugr_email/);
+  assert.match(sqlAuth, /is_verified_go_ugr_user/);
+  assert.match(sqlAuth, /revoke all on function public\.submit_booking_request/i);
+  assert.match(sqlAuth, /revoke all on function public\.get_public_availability/i);
+});
+
+test('valida correos exclusivos @go.ugr.es para acceso autenticado', () => {
+  assert.equal(isValidGoUgrEmail('estudiante@go.ugr.es'), true);
+  assert.equal(isValidGoUgrEmail('VCALERO@GO.UGR.ES'), true);
+  assert.equal(isValidGoUgrEmail('docente@ugr.es'), false);
+  assert.equal(isValidGoUgrEmail('persona@correo.ugr.es'), false);
+  assert.equal(isValidGoUgrEmail('externo@gmail.com'), false);
+  assert.equal(isValidGoUgrEmail('falso@sub.go.ugr.es'), false);
 });

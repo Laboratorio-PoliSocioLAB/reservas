@@ -3,7 +3,7 @@ import { CONFIG, isConfigured } from './config.js';
 import {
   ROOM_NAMES,
   RESOURCE_LABELS,
-  isValidUgrEmail,
+  isValidGoUgrEmail,
   addDays,
   mondayOf,
   computeConsecutiveHours,
@@ -67,6 +67,8 @@ const state = {
   activeSlot: null,
   selectedResource: '',
   loadSeq: 0,
+  userEmail: '',
+  userName: '',
 };
 
 function setStatus(message, kind = 'info') {
@@ -85,6 +87,27 @@ function clampDate(iso) {
   if (iso < state.today) return state.today;
   if (iso > state.lastDate) return state.lastDate;
   return iso;
+}
+
+function getCleanRedirectUrl() {
+  return window.location.origin + window.location.pathname;
+}
+
+function showAuthGate(message = '', kind = 'info') {
+  state.userEmail = '';
+  state.userName = '';
+  $('authGate').hidden = false;
+  $('appContent').hidden = true;
+  if ($('requestDialog').open) $('requestDialog').close();
+  setStatus(message, kind);
+}
+
+function showAppForUser(email, fullName = '') {
+  state.userEmail = email;
+  state.userName = fullName;
+  $('sessionEmail').textContent = fullName ? `${fullName} · ${email}` : email;
+  $('authGate').hidden = true;
+  $('appContent').hidden = false;
 }
 
 function renderWeek() {
@@ -199,6 +222,8 @@ function openRequestDialog(slot) {
   state.selectedResource = slot.available[0];
 
   $('requestForm').reset();
+  $('requesterName').value = state.userName || '';
+  $('requesterEmail').value = state.userEmail || '';
   $('requestError').hidden = true;
   $('requestMeta').textContent =
     `${ROOM_NAMES[slot.room]} · ${formatDateShortEs(slot.date)} · inicio a las ${slot.start}`;
@@ -238,7 +263,11 @@ function openRequestDialog(slot) {
 
   updateDurationSelect();
   $('requestDialog').showModal();
-  $('requesterName').focus();
+  if ($('requesterName').value.trim()) {
+    $('purpose').focus();
+  } else {
+    $('requesterName').focus();
+  }
 }
 
 async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
@@ -277,6 +306,69 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
   }
 }
 
+async function syncAuthSession(session) {
+  if (demoMode) {
+    showAppForUser('demo@go.ugr.es', 'Usuario demo');
+    await loadDay('');
+    return;
+  }
+
+  if (!session?.user?.email) {
+    showAuthGate('', 'info');
+    return;
+  }
+
+  const email = session.user.email.trim().toLowerCase();
+  if (!isValidGoUgrEmail(email)) {
+    await supabase.auth.signOut();
+    showAuthGate(
+      `La cuenta ${email} no pertenece al dominio @go.ugr.es. Inicia sesión con tu cuenta institucional de la UGR (@go.ugr.es).`,
+      'error'
+    );
+    return;
+  }
+
+  const meta = session.user.user_metadata || {};
+  const fullName = String(meta.full_name || meta.name || '').trim();
+  const alreadyLoadedSameUser = state.userEmail === email && !$('appContent').hidden;
+
+  showAppForUser(email, fullName);
+  if (!alreadyLoadedSameUser) {
+    await loadDay('');
+  }
+}
+
+async function signInWithGoogle() {
+  if (demoMode) return;
+  const btn = $('googleLoginBtn');
+  btn.disabled = true;
+  setStatus('Redirigiendo a Google (@go.ugr.es)…', 'info');
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: getCleanRedirectUrl(),
+      queryParams: {
+        hd: 'go.ugr.es',
+        prompt: 'select_account',
+      },
+    },
+  });
+
+  if (error) {
+    btn.disabled = false;
+    setStatus('No se pudo iniciar sesión con Google: ' + error.message, 'error');
+  }
+}
+
+$('googleLoginBtn').addEventListener('click', signInWithGoogle);
+
+$('logoutBtn').addEventListener('click', async () => {
+  if (demoMode) return;
+  await supabase.auth.signOut();
+  showAuthGate('Has cerrado sesión. Puedes volver a entrar con tu cuenta @go.ugr.es.', 'info');
+});
+
 $('requestForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -284,14 +376,7 @@ $('requestForm').addEventListener('submit', async (event) => {
   errBox.hidden = true;
 
   const nameInput = $('requesterName');
-  const emailInput = $('requesterEmail');
   const purposeInput = $('purpose');
-
-  // Limpiar mensaje personalizado previo antes de comprobar validez nativa
-  emailInput.setCustomValidity('');
-  if (emailInput.value.trim() && !isValidUgrEmail(emailInput.value)) {
-    emailInput.setCustomValidity('Usa un correo institucional terminado en ugr.es.');
-  }
 
   if (!form.checkValidity()) {
     const firstInvalid = form.querySelector(':invalid');
@@ -312,7 +397,7 @@ $('requestForm').addEventListener('submit', async (event) => {
     const hours = Number($('duration').value) || 1;
     const payload = {
       p_name: nameInput.value.trim(),
-      p_email: emailInput.value.trim().toLowerCase(),
+      p_email: state.userEmail,
       p_resource_id: state.selectedResource,
       p_date: slot.date,
       p_start_time: slot.start,
@@ -327,6 +412,7 @@ $('requestForm').addEventListener('submit', async (event) => {
       created = {
         id: 'demo-' + Math.random().toString(36).slice(2, 10),
         resource_label: RESOURCE_LABELS[state.selectedResource] || state.selectedResource,
+        requester_email: state.userEmail,
         date: slot.date,
         start: slot.start,
         end,
@@ -354,10 +440,11 @@ $('requestForm').addEventListener('submit', async (event) => {
             console.warn('No se pudo enviar el aviso al personal:', notifyErr);
           });
 
+    const targetEmail = created.requester_email || state.userEmail;
     await Promise.all([
       loadDay(
         slot.date,
-        `Solicitud enviada (${created.resource_label}, ${formatDateShortEs(created.date)} · ${created.start}–${created.end}). Queda pendiente de revisión y recibirás confirmación en ${payload.p_email}. Ref.: ${created.id}`,
+        `Solicitud enviada (${created.resource_label}, ${formatDateShortEs(created.date)} · ${created.start}–${created.end}). Queda pendiente de revisión y recibirás confirmación en ${targetEmail}. Ref.: ${created.id}`,
         'ok'
       ),
       notifyPromise,
@@ -389,4 +476,14 @@ if (demoMode) {
 
 initDialogLightDismissFallback();
 initAccessibleValidation();
-loadDay('');
+
+if (demoMode) {
+  syncAuthSession(null);
+} else {
+  supabase.auth.onAuthStateChange((_event, session) => {
+    syncAuthSession(session);
+  });
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    syncAuthSession(session);
+  });
+}

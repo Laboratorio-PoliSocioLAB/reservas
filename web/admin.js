@@ -369,10 +369,12 @@ async function checkSession() {
     .maybeSingle();
 
   if (error || !staffRow) {
-    await supabase.auth.signOut();
     $('loginSection').hidden = false;
     $('adminPanel').hidden = true;
-    setStatus('Esta cuenta no está autorizada en staff_users.', 'error');
+    setStatus(
+      `La cuenta ${currentUserEmail} no está autorizada como personal de revisión. Si quieres reservar un laboratorio, vuelve al portal de reservas, o inicia sesión con una cuenta de personal.`,
+      'error'
+    );
     return;
   }
 
@@ -382,6 +384,27 @@ async function checkSession() {
   $('blockDate').value = formatMadridToday();
   await refreshData();
 }
+
+$('googleStaffLoginBtn').addEventListener('click', async () => {
+  if (!configured) return;
+  const btn = $('googleStaffLoginBtn');
+  btn.disabled = true;
+  setStatus('Redirigiendo a Google (@go.ugr.es)…', 'info');
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname,
+      queryParams: {
+        hd: 'go.ugr.es',
+        prompt: 'select_account',
+      },
+    },
+  });
+  if (error) {
+    btn.disabled = false;
+    setStatus('No se pudo iniciar sesión con Google: ' + error.message, 'error');
+  }
+});
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();

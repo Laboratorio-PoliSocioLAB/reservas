@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Panel de gestión · PoliSocioLAB</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -28,7 +29,23 @@
 
     <section id="loginSection" aria-labelledby="loginTitle" hidden>
       <h2 id="loginTitle">Acceso del personal autorizado</h2>
-      <p class="muted">Inicia sesión con tu cuenta de personal registrada en PoliSocioLAB.</p>
+      <p class="muted">Inicia sesión con tu cuenta de personal registrada en PoliSocioLAB (<code>@go.ugr.es</code>).</p>
+
+      <div class="actions" style="margin-bottom:0.5rem">
+        <button id="googleStaffLoginBtn" type="button" class="primary google-btn">
+          <span class="google-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29A7.19 7.19 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.39l4-3.1z"/>
+              <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.61l4 3.1c.95-2.84 3.6-4.95 6.72-4.95z"/>
+            </svg>
+          </span>
+          <span>Entrar con Google (@go.ugr.es)</span>
+        </button>
+      </div>
+
+      <div class="auth-divider" aria-hidden="true">o con contraseña</div>
 
       <form id="loginForm" style="max-width:26rem">
         <div class="field">
@@ -141,7 +158,7 @@
 
   <footer>
     <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
-    <span><a href="index.html">Volver al calendario público</a></span>
+    <span><a href="privacidad.html">Privacidad</a> · <a href="index.html">Volver al portal de reservas</a></span>
   </footer>
 
   <script type="module" src="admin.js"></script>

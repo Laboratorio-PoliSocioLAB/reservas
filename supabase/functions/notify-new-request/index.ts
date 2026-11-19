@@ -1,6 +1,6 @@
 // Supabase Edge Function: notify-new-request
 // Envía un aviso por correo al personal (STAFF_NOTIFY_EMAIL, p. ej. vcalero@ugr.es)
-// cada vez que entra una nueva solicitud de reserva PENDIENTE.
+// cada vez que entra una nueva solicitud de reserva PENDIENTE de un usuario autenticado @go.ugr.es.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -11,6 +11,7 @@ const corsHeaders = {
 };
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const GO_UGR_EMAIL_REGEX = /^[a-z0-9][a-z0-9._+-]{0,63}@go\.ugr\.es$/i;
 
 function escapeHtml(text: string): string {
   return String(text || '')
@@ -30,16 +31,19 @@ function formatTimeShort(t: string): string {
   return String(t || '').slice(0, 5);
 }
 
-function buildStaffAlertEmail(booking: {
-  id: string;
-  requester_name: string;
-  requester_email: string;
-  booking_date: string;
-  start_time: string;
-  end_time: string;
-  purpose: string;
-  resource_label: string;
-}, adminUrl: string) {
+function buildStaffAlertEmail(
+  booking: {
+    id: string;
+    requester_name: string;
+    requester_email: string;
+    booking_date: string;
+    start_time: string;
+    end_time: string;
+    purpose: string;
+    resource_label: string;
+  },
+  adminUrl: string
+) {
   const dateEs = formatDateEs(booking.booking_date);
   const start = formatTimeShort(booking.start_time);
   const end = formatTimeShort(booking.end_time);
@@ -140,6 +144,25 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const authHeader = req.headers.get('Authorization') ?? '';
+
+    // 1. Verificar JWT de usuario autenticado @go.ugr.es
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    const userEmail = (userData?.user?.email || '').trim().toLowerCase();
+
+    if (userErr || !userEmail || !GO_UGR_EMAIL_REGEX.test(userEmail)) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Se requiere sesión verificada @go.ugr.es.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const bookingId = typeof body?.bookingId === 'string' ? body.bookingId.trim() : '';
 
@@ -150,8 +173,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const relayUrl = Deno.env.get('MAIL_RELAY_URL') || '';
     const relaySecret = Deno.env.get('MAIL_RELAY_SECRET') || '';
     const fromName = Deno.env.get('MAIL_FROM_NAME') || 'PoliSocioLAB · Facultad de Ciencias Políticas y Sociología';
@@ -168,12 +189,13 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Reclamo atómico: solo notifica una vez y solo para solicitudes PENDIENTES creadas hace menos de 10 minutos
+    // 2. Reclamo atómico: solo notifica una vez, solo para la solicitud PENDIENTE del propio usuario creada hace <10 min
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
     const { data: booking, error: claimErr } = await adminClient
       .from('bookings')
       .update({ staff_notified_at: new Date().toISOString() })
       .eq('id', bookingId)
+      .eq('requester_email', userEmail)
       .eq('status', 'PENDIENTE')
       .is('staff_notified_at', null)
       .gte('created_at', tenMinutesAgo)

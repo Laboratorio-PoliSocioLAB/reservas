@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>PoliSocioLAB · Reservas de laboratorios</title>
   <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
   <link rel="stylesheet" href="styles.css">
@@ -25,52 +26,90 @@
       <strong>Modo demostración local:</strong> todavía no has conectado tu proyecto de Supabase en <code>web/config.js</code>. Puedes probar la interfaz completa con datos simulados; sigue el archivo <code>README.md</code> para activar la base de datos y los avisos reales.
     </div>
 
-    <div class="intro-banner" role="note">
-      <strong>Cómo funciona:</strong> consulta los horarios libres (08:00–21:00, de lunes a viernes), elige laboratorio o puesto y envía tu solicitud con tu correo institucional de la UGR (dominio terminado en <strong>ugr.es</strong>). El personal de la Facultad revisará la solicitud y recibirás confirmación automática por correo.
-    </div>
+    <p id="status" class="notice" role="status" aria-live="polite" data-kind="info">Comprobando sesión…</p>
 
-    <p id="status" class="notice" role="status" aria-live="polite" data-kind="info">Cargando disponibilidad…</p>
-
-    <section aria-labelledby="calendarTitle">
-      <div class="bar">
-        <h2 id="calendarTitle">Calendario de disponibilidad</h2>
-        <button id="refresh" type="button">Actualizar</button>
+    <section id="authGate" class="auth-gate" aria-labelledby="authGateTitle" hidden>
+      <h2 id="authGateTitle">Acceso comunidad universitaria UGR</h2>
+      <p>
+        El sistema de reservas de <strong>PoliSocioLAB</strong> está limitado a usuarios de la Universidad de
+        Granada con cuenta institucional <strong>@go.ugr.es</strong>.
+      </p>
+      <p class="muted">
+        Inicia sesión con Google seleccionando tu cuenta <code>@go.ugr.es</code> para ver la disponibilidad
+        en tiempo real (08:00–21:00, de lunes a viernes) y enviar solicitudes de reserva.
+      </p>
+      <div class="actions">
+        <button id="googleLoginBtn" type="button" class="primary google-btn">
+          <span class="google-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.29A7.19 7.19 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.39l4-3.1z"/>
+              <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.61l4 3.1c.95-2.84 3.6-4.95 6.72-4.95z"/>
+            </svg>
+          </span>
+          <span>Entrar con Google (@go.ugr.es)</span>
+        </button>
       </div>
-      <div class="date-nav">
-        <button id="prev" type="button" aria-label="Semana anterior">←</button>
-        <button id="today" type="button">Hoy</button>
-        <button id="next" type="button" aria-label="Semana siguiente">→</button>
-        <label for="date" style="margin:0">Ir a fecha</label>
-        <input type="date" id="date" required>
-      </div>
-      <div id="week" class="week" aria-label="Días de la semana"></div>
-      <strong id="selectedDate"></strong>
     </section>
 
-    <div class="rooms">
-      <section aria-labelledby="radioTitle">
-        <h2 id="radioTitle">Laboratorio de radio</h2>
-        <p class="muted">Reserva del espacio completo.</p>
-        <div id="radio"><p class="muted">Cargando…</p></div>
+    <div id="appContent" hidden>
+      <div id="sessionBar" class="session-bar">
+        <div class="session-identity">
+          <span class="pill">Sesión UGR verificada</span>
+          <strong id="sessionEmail"></strong>
+        </div>
+        <div class="actions">
+          <button id="logoutBtn" type="button">Cambiar cuenta / Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div class="intro-banner" role="note">
+        <strong>Cómo funciona:</strong> consulta los horarios libres (08:00–21:00, de lunes a viernes), elige laboratorio o puesto y envía tu solicitud. El personal de la Facultad revisará la solicitud y recibirás confirmación automática en tu correo <strong>@go.ugr.es</strong>.
+      </div>
+
+      <section aria-labelledby="calendarTitle">
+        <div class="bar">
+          <h2 id="calendarTitle">Calendario de disponibilidad</h2>
+          <button id="refresh" type="button">Actualizar</button>
+        </div>
+        <div class="date-nav">
+          <button id="prev" type="button" aria-label="Semana anterior">←</button>
+          <button id="today" type="button">Hoy</button>
+          <button id="next" type="button" aria-label="Semana siguiente">→</button>
+          <label for="date" style="margin:0">Ir a fecha</label>
+          <input type="date" id="date" required>
+        </div>
+        <div id="week" class="week" aria-label="Días de la semana"></div>
+        <strong id="selectedDate"></strong>
       </section>
 
-      <section aria-labelledby="qualOneTitle">
-        <h2 id="qualOneTitle">Laboratorio cualitativo 1</h2>
-        <p class="muted">Reserva del espacio completo.</p>
-        <div id="qualOne"><p class="muted">Cargando…</p></div>
-      </section>
+      <div class="rooms">
+        <section aria-labelledby="radioTitle">
+          <h2 id="radioTitle">Laboratorio de radio</h2>
+          <p class="muted">Reserva del espacio completo.</p>
+          <div id="radio"><p class="muted">Cargando…</p></div>
+        </section>
 
-      <section aria-labelledby="qualTwoTitle">
-        <h2 id="qualTwoTitle">Laboratorio cualitativo 2</h2>
-        <p class="muted">10 puestos independientes (hasta 10 reservas simultáneas).</p>
-        <div id="qualTwo"><p class="muted">Cargando…</p></div>
-      </section>
+        <section aria-labelledby="qualOneTitle">
+          <h2 id="qualOneTitle">Laboratorio cualitativo 1</h2>
+          <p class="muted">Reserva del espacio completo.</p>
+          <div id="qualOne"><p class="muted">Cargando…</p></div>
+        </section>
+
+        <section aria-labelledby="qualTwoTitle">
+          <h2 id="qualTwoTitle">Laboratorio cualitativo 2</h2>
+          <p class="muted">10 puestos independientes (hasta 10 reservas simultáneas).</p>
+          <div id="qualTwo"><p class="muted">Cargando…</p></div>
+        </section>
+      </div>
     </div>
   </main>
 
   <footer>
     <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
     <span>
+      <a href="privacidad.html">Privacidad</a> ·
       <a href="admin.html">Acceso personal (revisión)</a>
     </span>
   </footer>
@@ -111,23 +150,16 @@
       </div>
 
       <div class="field">
-        <label for="requesterEmail">Correo institucional UGR</label>
-        <span id="emailHint" class="hint">Debe terminar en ugr.es (por ejemplo, @go.ugr.es, @correo.ugr.es o @ugr.es).</span>
+        <label for="requesterEmail">Correo institucional UGR (verificado)</label>
+        <span id="emailHint" class="hint">Tomado automáticamente de tu sesión de Google (@go.ugr.es).</span>
         <input
           type="email"
           id="requesterEmail"
           name="requesterEmail"
           required
-          maxlength="120"
-          autocomplete="email"
-          placeholder="tuusuario@go.ugr.es"
-          pattern="[a-zA-Z0-9][a-zA-Z0-9._+\-]{0,63}@([a-zA-Z0-9\-]+\.)*[uU][gG][rR]\.[eE][sS]"
+          readonly
           aria-describedby="emailHint"
-          data-error="emailError"
         >
-        <div id="emailError" class="error-msg">
-          <span role="img" aria-label="Error">❌</span> Introduce un correo válido de la UGR cuyo dominio termine en ugr.es.
-        </div>
       </div>
 
       <div class="field">

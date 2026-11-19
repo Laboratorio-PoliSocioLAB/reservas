@@ -3,6 +3,9 @@
 export const UGR_EMAIL_PATTERN = '^[a-zA-Z0-9][a-zA-Z0-9._+\\-]{0,63}@([a-zA-Z0-9\\-]+\\.)*ugr\\.es$';
 export const UGR_EMAIL_REGEX = new RegExp(UGR_EMAIL_PATTERN, 'i');
 
+export const GO_UGR_EMAIL_PATTERN = '^[a-zA-Z0-9][a-zA-Z0-9._+\\-]{0,63}@go\\.ugr\\.es$';
+export const GO_UGR_EMAIL_REGEX = new RegExp(GO_UGR_EMAIL_PATTERN, 'i');
+
 export const ROOM_NAMES = {
   RADIO: 'Laboratorio de radio',
   CUALITATIVO1: 'Laboratorio cualitativo 1',
@@ -20,6 +23,10 @@ export const RESOURCE_LABELS = Object.fromEntries([
 
 export function isValidUgrEmail(value) {
   return UGR_EMAIL_REGEX.test(String(value || '').trim());
+}
+
+export function isValidGoUgrEmail(value) {
+  return GO_UGR_EMAIL_REGEX.test(String(value || '').trim());
 }
 
 export function parseUtcDate(iso) {
