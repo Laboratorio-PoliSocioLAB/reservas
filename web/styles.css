@@ -493,8 +493,44 @@ input[readonly] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.65rem;
   font-size: 0.94rem;
+}
+
+.user-avatar,
+.user-avatar-fallback {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.user-avatar {
+  display: block;
+  object-fit: cover;
+  border: 2px solid var(--orange);
+  background: var(--background);
+}
+
+.user-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--header-bg);
+  color: #ffe0cc;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 2px solid var(--orange);
+}
+
+.session-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.session-text small {
+  font-size: 0.84rem;
 }
 
 input[type="text"],

@@ -4,6 +4,8 @@ import {
   ROOM_NAMES,
   RESOURCE_LABELS,
   isValidGoUgrEmail,
+  getSafeGoogleAvatarUrl,
+  renderUserAvatar,
   addDays,
   mondayOf,
   computeConsecutiveHours,
@@ -132,10 +134,16 @@ function showAuthGate(message = '', kind = 'info') {
   setStatus(message, kind);
 }
 
-function showAppForUser(email, fullName = '') {
+function showAppForUser(email, fullName = '', avatarUrl = '') {
   state.userEmail = email;
   state.userName = fullName;
-  $('sessionEmail').textContent = fullName ? `${fullName} · ${email}` : email;
+  $('sessionName').textContent = fullName || email;
+  $('sessionEmail').textContent = fullName ? email : 'Cuenta UGR verificada';
+  renderUserAvatar($('sessionAvatar'), $('sessionAvatarFallback'), {
+    avatarUrl,
+    name: fullName,
+    email,
+  });
   $('authGate').hidden = true;
   $('appContent').hidden = false;
 }
@@ -409,9 +417,10 @@ async function syncAuthSession(session) {
 
   const meta = session.user.user_metadata || {};
   const fullName = String(meta.full_name || meta.name || '').trim();
+  const avatarUrl = getSafeGoogleAvatarUrl(session.user);
   const sameUser = state.userEmail === email && !$('appContent').hidden;
 
-  showAppForUser(email, fullName);
+  showAppForUser(email, fullName, avatarUrl);
   if (!sameUser) {
     state.selectedRoom = '';
     $('spaceMenuView').hidden = false;

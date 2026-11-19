@@ -30,6 +30,47 @@ export function isValidGoUgrEmail(value) {
   return GO_UGR_EMAIL_REGEX.test(String(value || '').trim());
 }
 
+export function getSafeGoogleAvatarUrl(user) {
+  const raw = String(user?.user_metadata?.avatar_url || user?.user_metadata?.picture || '').trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'https:') return '';
+    const host = parsed.hostname.toLowerCase();
+    const isGoogleHost =
+      host === 'googleusercontent.com' ||
+      host.endsWith('.googleusercontent.com') ||
+      host === 'google.com' ||
+      host.endsWith('.google.com');
+    return isGoogleHost ? parsed.href : '';
+  } catch {
+    return '';
+  }
+}
+
+export function renderUserAvatar(imgEl, fallbackEl, { avatarUrl = '', name = '', email = '' } = {}) {
+  if (!imgEl || !fallbackEl) return;
+  const initial = (String(name || email || '?').trim().charAt(0) || '?').toUpperCase();
+  fallbackEl.textContent = initial;
+
+  const showFallback = () => {
+    imgEl.hidden = true;
+    imgEl.removeAttribute('src');
+    fallbackEl.hidden = false;
+  };
+
+  if (!avatarUrl) {
+    showFallback();
+    return;
+  }
+
+  imgEl.onerror = showFallback;
+  imgEl.alt = name ? `Foto de perfil de ${name}` : 'Foto de perfil';
+  imgEl.src = avatarUrl;
+  imgEl.hidden = false;
+  fallbackEl.hidden = true;
+}
+
 export function parseUtcDate(iso) {
   return new Date(iso + 'T00:00:00Z');
 }

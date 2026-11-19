@@ -1,6 +1,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { CONFIG, isConfigured } from './config.js';
-import { RESOURCE_LABELS, formatDateShortEs, formatMadridToday } from './shared.js';
+import {
+  RESOURCE_LABELS,
+  getSafeGoogleAvatarUrl,
+  renderUserAvatar,
+  formatDateShortEs,
+  formatMadridToday,
+} from './shared.js';
 
 const $ = (id) => document.getElementById(id);
 const configured = isConfigured();
@@ -380,7 +386,14 @@ async function checkSession() {
 
   $('loginSection').hidden = true;
   $('adminPanel').hidden = false;
-  $('staffAccount').textContent = `Sesión iniciada: ${staffRow.display_name || currentUserEmail} (${currentUserEmail})`;
+  const displayName = staffRow.display_name || session.user.user_metadata?.full_name || currentUserEmail;
+  $('staffName').textContent = displayName;
+  $('staffAccount').textContent = currentUserEmail;
+  renderUserAvatar($('staffAvatar'), $('staffAvatarFallback'), {
+    avatarUrl: getSafeGoogleAvatarUrl(session.user),
+    name: displayName,
+    email: currentUserEmail,
+  });
   $('blockDate').value = formatMadridToday();
   await refreshData();
 }

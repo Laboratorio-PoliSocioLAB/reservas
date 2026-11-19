@@ -48,7 +48,14 @@
 
     <div id="adminPanel" hidden>
       <div class="bar">
-        <span id="staffAccount" class="muted"></span>
+        <div class="session-identity">
+          <img id="staffAvatar" class="user-avatar" width="38" height="38" alt="" referrerpolicy="no-referrer" hidden>
+          <span id="staffAvatarFallback" class="user-avatar-fallback" aria-hidden="true" hidden></span>
+          <div class="session-text">
+            <strong id="staffName"></strong>
+            <small id="staffAccount"></small>
+          </div>
+        </div>
         <div class="actions">
           <a class="btn" href="index.html">Ver calendario público</a>
           <button id="refreshAll" type="button">Actualizar</button>

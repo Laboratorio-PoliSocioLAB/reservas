@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   isValidUgrEmail,
   isValidGoUgrEmail,
+  getSafeGoogleAvatarUrl,
   computeConsecutiveHours,
   addDays,
   mondayOf,
@@ -124,4 +125,25 @@ test('valida correos exclusivos @go.ugr.es para acceso autenticado', () => {
   assert.equal(isValidGoUgrEmail('persona@correo.ugr.es'), false);
   assert.equal(isValidGoUgrEmail('externo@gmail.com'), false);
   assert.equal(isValidGoUgrEmail('falso@sub.go.ugr.es'), false);
+});
+
+test('filtra de forma segura la URL de avatar de Google', () => {
+  assert.equal(
+    getSafeGoogleAvatarUrl({
+      user_metadata: { avatar_url: 'https://lh3.googleusercontent.com/a/ACg8ocTest=s96-c' },
+    }),
+    'https://lh3.googleusercontent.com/a/ACg8ocTest=s96-c'
+  );
+  assert.equal(
+    getSafeGoogleAvatarUrl({
+      user_metadata: { picture: 'https://evil.example.com/pic.png' },
+    }),
+    ''
+  );
+  assert.equal(
+    getSafeGoogleAvatarUrl({
+      user_metadata: { avatar_url: 'javascript:alert(1)' },
+    }),
+    ''
+  );
 });

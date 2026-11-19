@@ -55,8 +55,12 @@
     <div id="appContent" hidden>
       <div id="sessionBar" class="session-bar">
         <div class="session-identity">
-          <span class="pill">Sesión UGR verificada</span>
-          <strong id="sessionEmail"></strong>
+          <img id="sessionAvatar" class="user-avatar" width="38" height="38" alt="" referrerpolicy="no-referrer" hidden>
+          <span id="sessionAvatarFallback" class="user-avatar-fallback" aria-hidden="true" hidden></span>
+          <div class="session-text">
+            <strong id="sessionName"></strong>
+            <small id="sessionEmail"></small>
+          </div>
         </div>
         <div class="actions">
           <button id="logoutBtn" type="button">Cambiar cuenta / Cerrar sesión</button>
