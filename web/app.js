@@ -346,11 +346,22 @@ $('requestForm').addEventListener('submit', async (event) => {
     }
 
     $('requestDialog').close();
-    await loadDay(
-      slot.date,
-      `Solicitud enviada (${created.resource_label}, ${formatDateShortEs(created.date)} · ${created.start}–${created.end}). Queda pendiente de revisión y recibirás confirmación en ${payload.p_email}. Ref.: ${created.id}`,
-      'ok'
-    );
+    const notifyPromise = demoMode
+      ? Promise.resolve()
+      : supabase.functions
+          .invoke('notify-new-request', { body: { bookingId: created.id } })
+          .catch((notifyErr) => {
+            console.warn('No se pudo enviar el aviso al personal:', notifyErr);
+          });
+
+    await Promise.all([
+      loadDay(
+        slot.date,
+        `Solicitud enviada (${created.resource_label}, ${formatDateShortEs(created.date)} · ${created.start}–${created.end}). Queda pendiente de revisión y recibirás confirmación en ${payload.p_email}. Ref.: ${created.id}`,
+        'ok'
+      ),
+      notifyPromise,
+    ]);
   } catch (err) {
     errBox.textContent = err?.message || 'No se pudo enviar la solicitud.';
     errBox.hidden = false;
