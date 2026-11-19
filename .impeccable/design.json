@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-20T00:25:00+01:00",
+  "title": "Design System: PoliSocioLAB Reservas",
+  "extensions": {
+    "colorMeta": {
+      "faculty-orange": {
+        "role": "primary",
+        "displayName": "Faculty Orange",
+        "canonical": "#B84408",
+        "tonalRamp": ["#2D0E01", "#521C03", "#782A04", "#963605", "#B84408", "#D96A32", "#EEAC89", "#FFF1E8"]
+      },
+      "faculty-orange-deep": {
+        "role": "primary",
+        "displayName": "Faculty Orange Deep",
+        "canonical": "#963605",
+        "tonalRamp": ["#240A01", "#441602", "#682303", "#963605", "#B84408", "#D66B36", "#ECA986", "#FDF0E7"]
+      },
+      "faculty-orange-ink": {
+        "role": "primary",
+        "displayName": "Faculty Orange Ink",
+        "canonical": "#A63C06",
+        "tonalRamp": ["#290C01", "#4C1902", "#722704", "#A63C06", "#C45015", "#DE7642", "#F0B191", "#FFF2EA"]
+      },
+      "faculty-orange-soft": {
+        "role": "primary",
+        "displayName": "Faculty Orange Soft",
+        "canonical": "#FFF1E8",
+        "tonalRamp": ["#331204", "#5A2109", "#87330F", "#B54A1B", "#D87344", "#ECA37E", "#F8CFB8", "#FFF1E8"]
+      },
+      "faculty-orange-line": {
+        "role": "primary",
+        "displayName": "Faculty Orange Line",
+        "canonical": "#E8B598",
+        "tonalRamp": ["#301608", "#572911", "#82401E", "#AD5D34", "#CE845D", "#E8B598", "#F4D6C4", "#FCF0E8"]
+      },
+      "capacity-teal": {
+        "role": "secondary",
+        "displayName": "Capacity Teal",
+        "canonical": "#0E6A52",
+        "tonalRamp": ["#031F18", "#063B2D", "#0B5542", "#0E6A52", "#1B886C", "#4BAE94", "#9FD4C3", "#E7F4EF"]
+      },
+      "capacity-teal-ink": {
+        "role": "secondary",
+        "displayName": "Capacity Teal Ink",
+        "canonical": "#0B5542",
+        "tonalRamp": ["#021A14", "#053327", "#0B5542", "#116F57", "#238F73", "#56B49B", "#A5D7C7", "#E9F5F0"]
+      },
+      "capacity-teal-wash": {
+        "role": "secondary",
+        "displayName": "Capacity Teal Wash",
+        "canonical": "#E7F4EF",
+        "tonalRamp": ["#05211A", "#0B3D30", "#145C4A", "#227E67", "#48A18A", "#7EC2AF", "#B8DFD3", "#E7F4EF"]
+      },
+      "capacity-teal-line": {
+        "role": "secondary",
+        "displayName": "Capacity Teal Line",
+        "canonical": "#9FD4C3",
+        "tonalRamp": ["#06221B", "#0E3F33", "#18604E", "#2C826D", "#54A48F", "#7CC0AD", "#9FD4C3", "#E2F2EC"]
+      },
+      "mineral-ground": {
+        "role": "neutral",
+        "displayName": "Mineral Ground",
+        "canonical": "#F4F5F7",
+        "tonalRamp": ["#171B20", "#2C323B", "#4C525C", "#6E7582", "#969DA9", "#BCC2CC", "#DCE0E7", "#F4F5F7"]
+      },
+      "mineral-rail": {
+        "role": "neutral",
+        "displayName": "Mineral Rail",
+        "canonical": "#EAECEF",
+        "tonalRamp": ["#171B20", "#2B313A", "#484F59", "#69717D", "#8F97A3", "#B5BCC6", "#D4D8E0", "#EAECEF"]
+      },
+      "sheet-white": {
+        "role": "neutral",
+        "displayName": "Sheet White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#171B20", "#323841", "#525864", "#767D8A", "#9DA3AF", "#C4C9D2", "#E5E8EE", "#FFFFFF"]
+      },
+      "sheet-tint": {
+        "role": "neutral",
+        "displayName": "Sheet Tint",
+        "canonical": "#F9FAFB",
+        "tonalRamp": ["#171B20", "#30363F", "#4F5661", "#737A87", "#99A0AC", "#C0C5CE", "#E2E5EB", "#F9FAFB"]
+      },
+      "slate-ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#171B20",
+        "tonalRamp": ["#171B20", "#282E37", "#434A55", "#646B78", "#8B929F", "#B3B9C4", "#D8DCE4", "#F2F4F7"]
+      },
+      "slate-muted": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "canonical": "#4C525C",
+        "tonalRamp": ["#171B20", "#2E333B", "#4C525C", "#69707D", "#8B929E", "#B1B7C2", "#D7DBE2", "#F1F3F6"]
+      },
+      "hairline-rule": {
+        "role": "neutral",
+        "displayName": "Hairline Rule",
+        "canonical": "#D4D8E0",
+        "tonalRamp": ["#1A1F26", "#313844", "#4F5766", "#717A8A", "#969FAE", "#B7BFC9", "#D4D8E0", "#EEF0F4"]
+      },
+      "hairline-soft": {
+        "role": "neutral",
+        "displayName": "Hairline Soft",
+        "canonical": "#E5E8EE",
+        "tonalRamp": ["#1B2027", "#343B47", "#525A69", "#767E8E", "#9CA3B2", "#C0C6D2", "#E5E8EE", "#F4F6F9"]
+      },
+      "field-stroke": {
+        "role": "neutral",
+        "displayName": "Field Stroke",
+        "canonical": "#646A75",
+        "tonalRamp": ["#191D23", "#31363F", "#4A505B", "#646A75", "#868D99", "#ACB2BC", "#D3D7DF", "#F0F2F5"]
+      },
+      "amber-ink": {
+        "role": "tertiary",
+        "displayName": "Amber Ink",
+        "canonical": "#7A4106",
+        "tonalRamp": ["#281301", "#4E2803", "#7A4106", "#A15C10", "#C87D27", "#E1A658", "#F1CE97", "#FEF4E2"]
+      },
+      "amber-wash": {
+        "role": "tertiary",
+        "displayName": "Amber Wash",
+        "canonical": "#FEF4E2",
+        "tonalRamp": ["#2B1703", "#522E09", "#7F4A12", "#AA6B23", "#CE9244", "#E5BC7C", "#F4DCAF", "#FEF4E2"]
+      },
+      "amber-line": {
+        "role": "tertiary",
+        "displayName": "Amber Line",
+        "canonical": "#E7C58B",
+        "tonalRamp": ["#2B1804", "#54320B", "#815017", "#AA712B", "#CD974E", "#E7C58B", "#F3DFBA", "#FDF4E5"]
+      },
+      "crimson-ink": {
+        "role": "tertiary",
+        "displayName": "Crimson Ink",
+        "canonical": "#9B1C1C",
+        "tonalRamp": ["#2B0505", "#560D0D", "#7F1515", "#9B1C1C", "#C53A3A", "#E07272", "#F1B0B0", "#FDECEC"]
+      },
+      "crimson-wash": {
+        "role": "tertiary",
+        "displayName": "Crimson Wash",
+        "canonical": "#FDECEC",
+        "tonalRamp": ["#2E0707", "#5B1111", "#881E1E", "#B23636", "#D26565", "#E89999", "#F5C6C6", "#FDECEC"]
+      },
+      "crimson-line": {
+        "role": "tertiary",
+        "displayName": "Crimson Line",
+        "canonical": "#E8B4B4",
+        "tonalRamp": ["#2D0909", "#581616", "#832727", "#AD4444", "#CC7373", "#E8B4B4", "#F4D4D4", "#FCEFEF"]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline (H1)",
+        "purpose": "Active laboratory title, auth gate heading, admin panel title, and privacy document title."
+      },
+      "title": {
+        "displayName": "Title (H2)",
+        "purpose": "Section headers inside dialogs, auth directory, admin tabs, and privacy prose."
+      },
+      "subtitle": {
+        "displayName": "Subtitle (H3)",
+        "purpose": "Compact secondary headings and sub-blocks."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Standard interface text, booking purposes, and 58ch privacy prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rail captions, form labels, timetable summaries, and tabular metadata."
+      },
+      "mono": {
+        "displayName": "Monospace Identifier",
+        "purpose": "Inline technical identifiers such as @go.ugr.es domain names."
+      }
+    },
+    "shadows": [
+      {
+        "name": "modal-overlay",
+        "value": "0 24px 48px -12px rgb(23 27 32 / 0.24)",
+        "purpose": "Top-layer native <dialog> elevation over dimmed backdrop."
+      },
+      {
+        "name": "tab-inset-active",
+        "value": "inset 0 0 0 1px #B84408",
+        "purpose": "Doubles visual border weight on selected room/admin tabs without layout shift."
+      }
+    ],
+    "motion": [
+      {
+        "name": "transition-control",
+        "value": "150ms ease",
+        "purpose": "Color and border feedback on buttons, tabs, links, and inputs."
+      },
+      {
+        "name": "reveal-sheet",
+        "value": "180ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Subtle vertical reveal when switching spaces or dates."
+      },
+      {
+        "name": "pulse-skeleton",
+        "value": "1.3s ease-in-out infinite",
+        "purpose": "Compositor-only opacity pulse for loading timetable placeholders."
+      },
+      {
+        "name": "spinner-rotate",
+        "value": "650ms linear infinite",
+        "purpose": "Compositor-only transform rotation on aria-busy buttons."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "720px"
+      },
+      {
+        "name": "tablet",
+        "value": "960px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary Faculty Orange CTA for requesting a booking slot or signing in with Google @go.ugr.es.",
+      "html": "<button type=\"button\" class=\"ds-btn-primary\">Solicitar</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.75rem; padding: 0.5rem 0.95rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--brand, #B84408); background: var(--brand, #B84408); color: #FFFFFF; font: 650 0.9375rem/1.2 \"Schibsted Grotesk\", system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-btn-primary:hover { background: var(--brand-hover, #963605); border-color: var(--brand-hover, #963605); } .ds-btn-primary:focus-visible { outline: 3px solid var(--brand, #B84408); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Flat white hairline action for neutral navigation, refresh, and dialog keep/cancel controls.",
+      "html": "<button type=\"button\" class=\"ds-btn-secondary\">Hoy</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.75rem; padding: 0.5rem 0.95rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--line, #D4D8E0); background: var(--surface, #FFFFFF); color: var(--ink, #171B20); font: 650 0.9375rem/1.2 \"Schibsted Grotesk\", system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-btn-secondary:hover { background: var(--surface-tint, #F9FAFB); border-color: var(--ink, #171B20); } .ds-btn-secondary:focus-visible { outline: 3px solid var(--brand, #B84408); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Confirmation Button",
+      "kind": "button",
+      "refersTo": "button-danger-solid",
+      "description": "High-contrast crimson confirmation CTA used exclusively inside destructive modal dialogs.",
+      "html": "<button type=\"button\" class=\"ds-btn-danger-solid\">Confirmar cancelación</button>",
+      "css": ".ds-btn-danger-solid { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.75rem; padding: 0.5rem 0.95rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--err-ink, #9B1C1C); background: var(--err-ink, #9B1C1C); color: #FFFFFF; font: 650 0.9375rem/1.2 \"Schibsted Grotesk\", system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-btn-danger-solid:hover { background: #7F1515; border-color: #7F1515; } .ds-btn-danger-solid:focus-visible { outline: 3px solid var(--brand, #B84408); outline-offset: 2px; }"
+    },
+    {
+      "name": "Room Switcher Tab",
+      "kind": "nav",
+      "refersTo": "room-tab-active",
+      "description": "Persistent left-rail laboratory selector showing space icon, live free-slot badge, metadata, and compact 10-seat meter.",
+      "html": "<button type=\"button\" class=\"ds-room-tab\" aria-pressed=\"true\"><span class=\"ds-room-tab-head\"><span class=\"ds-room-tab-title\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4\"/></svg>Cualitativo 2</span><span class=\"ds-room-tab-count\">12 libres</span></span><span class=\"ds-room-tab-meta\">Aforo compartido · 10 plazas</span></button>",
+      "css": ".ds-room-tab { width: 100%; max-width: 18rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; padding: 0.95rem 1rem; border-radius: var(--radius-md, 8px); border: 1px solid var(--line, #D4D8E0); background: var(--surface-tint, #F9FAFB); color: var(--ink, #171B20); text-align: left; font-family: \"Schibsted Grotesk\", system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-room-tab:hover { background: var(--surface, #FFFFFF); border-color: var(--brand, #B84408); } .ds-room-tab[aria-pressed=\"true\"] { background: var(--surface, #FFFFFF); border-color: var(--brand, #B84408); box-shadow: inset 0 0 0 1px var(--brand, #B84408); } .ds-room-tab:focus-visible { outline: 3px solid var(--brand, #B84408); outline-offset: 2px; } .ds-room-tab-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; } .ds-room-tab-title { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 700; } .ds-room-tab-title svg { color: var(--brand-ink, #A63C06); flex-shrink: 0; } .ds-room-tab-count { font-size: 0.8125rem; font-weight: 700; font-variant-numeric: tabular-nums; padding: 0.18rem 0.55rem; border-radius: 999px; background: var(--brand, #B84408); color: #FFFFFF; white-space: nowrap; } .ds-room-tab-meta { font-size: 0.875rem; font-weight: 500; color: var(--muted, #4C525C); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Ten-Seat Occupancy Meter",
+      "kind": "custom",
+      "refersTo": "sheet-card",
+      "description": "Signature 10-cell architectural occupancy bar for Cualitativo 2 showing green open seats, orange scarcity (<=3 left), and muted occupied seats.",
+      "html": "<div class=\"ds-meter-demo\"><div class=\"ds-seat-row\"><span class=\"ds-seat-meter\" aria-hidden=\"true\"><i class=\"ds-seat-cell\"></i><i class=\"ds-seat-cell\"></i><i class=\"ds-seat-cell\"></i><i class=\"ds-seat-cell\"></i><i class=\"ds-seat-cell\"></i><i class=\"ds-seat-cell\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i></span><span class=\"ds-seat-cap\">6/10 libres</span></div><div class=\"ds-seat-row\"><span class=\"ds-seat-meter\" aria-hidden=\"true\"><i class=\"ds-seat-cell is-low\"></i><i class=\"ds-seat-cell is-low\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i><i class=\"ds-seat-cell is-used\"></i></span><span class=\"ds-seat-cap is-low\">2/10 libres</span></div></div>",
+      "css": ".ds-meter-demo { display: flex; flex-direction: column; gap: 0.65rem; font-family: \"Schibsted Grotesk\", system-ui, sans-serif; } .ds-seat-row { display: flex; align-items: center; gap: 1rem; } .ds-seat-meter { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; width: 12rem; } .ds-seat-cell { display: block; height: 8px; border-radius: 2px; background: var(--ok, #0E6A52); } .ds-seat-cell.is-low { background: var(--brand, #B84408); } .ds-seat-cell.is-used { background: #D8DCE4; } .ds-seat-cap { font-size: 0.875rem; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--ok-ink, #0B5542); } .ds-seat-cap.is-low { color: var(--warn-ink, #7A4106); }"
+    },
+    {
+      "name": "Weekday Selector Button",
+      "kind": "nav",
+      "refersTo": "day-button-current",
+      "description": "7-day week strip tile distinguishing active selected day (solid slate), open weekday (white), and closed weekend (dashed rail).",
+      "html": "<div class=\"ds-week-sample\"><button type=\"button\" class=\"ds-day-btn\" aria-current=\"date\"><small>Vie</small><strong>20</strong></button><button type=\"button\" class=\"ds-day-btn is-weekend\" disabled><small>Sáb</small><strong>21</strong></button></div>",
+      "css": ".ds-week-sample { display: inline-flex; gap: 0.5rem; font-family: \"Schibsted Grotesk\", system-ui, sans-serif; } .ds-day-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-width: 3.25rem; min-height: 3.25rem; padding: 0.55rem 0.5rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--line, #D4D8E0); background: var(--surface, #FFFFFF); color: var(--ink, #171B20); cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-day-btn small { font-size: 0.75rem; font-weight: 600; color: var(--muted, #4C525C); } .ds-day-btn strong { font-size: 1.0625rem; font-weight: 750; font-variant-numeric: tabular-nums; line-height: 1.1; } .ds-day-btn[aria-current=\"date\"] { background: var(--ink, #171B20); border-color: var(--ink, #171B20); color: #FFFFFF; } .ds-day-btn[aria-current=\"date\"] small { color: #E0E4EC; } .ds-day-btn[aria-current=\"date\"]:hover { background: #252B33; border-color: #252B33; } .ds-day-btn.is-weekend { background: var(--rail, #EAECEF); border-style: dashed; border-color: #BFC5D0; color: var(--muted, #4C525C); opacity: 0.72; cursor: not-allowed; } .ds-day-btn:focus-visible { outline: 3px solid var(--brand, #B84408); outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "refersTo": "status-tag-available",
+      "description": "High-contrast pill communicating booking workflow states (Aprobada, Pendiente, Completa).",
+      "html": "<div class=\"ds-tag-group\"><span class=\"ds-status-tag\" data-state=\"APROBADA\">Aprobada</span><span class=\"ds-status-tag\" data-state=\"PENDIENTE\">Pendiente</span><span class=\"ds-status-tag\" data-state=\"COMPLETO\">Completo</span></div>",
+      "css": ".ds-tag-group { display: inline-flex; flex-wrap: wrap; gap: 0.5rem; font-family: \"Schibsted Grotesk\", system-ui, sans-serif; } .ds-status-tag { display: inline-flex; align-items: center; justify-content: center; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; background: var(--ok-bg, #E7F4EF); color: var(--ok-ink, #0B5542); border: 1px solid var(--ok-line, #9FD4C3); white-space: nowrap; } .ds-status-tag[data-state=\"PENDIENTE\"] { background: var(--warn-bg, #FEF4E2); color: var(--warn-ink, #7A4106); border-color: var(--warn-line, #E7C58B); } .ds-status-tag[data-state=\"COMPLETO\"] { background: var(--rail, #EAECEF); color: var(--muted, #4C525C); border-color: var(--line, #D4D8E0); }"
+    },
+    {
+      "name": "Form Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "High-contrast labeled form input with focus-within label tint and iOS-zoom-safe 16px minimum text.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-purpose\">Motivo académico o actividad</label><input id=\"ds-purpose\" type=\"text\" placeholder=\"Grabación de entrevista para TFG\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.3rem; max-width: 24rem; font-family: \"Schibsted Grotesk\", system-ui, sans-serif; } .ds-field label { font-size: 0.9375rem; font-weight: 700; color: var(--ink, #171B20); } .ds-field:focus-within label { color: var(--brand-ink, #A63C06); } .ds-field input { min-height: 2.85rem; padding: 0.55rem 0.8rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--input-border, #646A75); background: var(--surface, #FFFFFF); color: var(--ink, #171B20); font: 400 1rem/1.4 \"Schibsted Grotesk\", system-ui, sans-serif; transition: border-color 150ms ease; } .ds-field input:focus-visible { outline: 3px solid var(--brand, #B84408); outline-offset: 2px; border-color: var(--brand, #B84408); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Plano de Aulario",
+    "overview": "Plano de Aulario treats laboratory booking as a European university architectural schedule rather than a multi-step SaaS dashboard. The institutional burnt-orange header of the Facultad de Ciencias Políticas y Sociología (UGR) anchors every screen, holding the official Faculty emblem inside a crisp white plaque while keeping the operational surface calm, legible, and fast under campus daylight and mobile thumbs.\n\nBeneath the header, a flush left mineral rail holds the three laboratories (Laboratorio de radio, Laboratorio cualitativo 1, and Laboratorio cualitativo 2) together with live availability counts and schematic floorplans, while the right-hand daylight canvas displays a 7-day week bar and a 1px-ruled hourly timetable from 08:00 to 21:00. Instead of generic floating cards, shadows, or decorative marketing copy, clarity comes from crisp hairline borders, tabular numerals, and a signature 10-segment occupancy meter that lets students and staff read room capacity in a single glance.\n\nThe system explicitly rejects generic SaaS chrome: no warm-beige AI backdrops, no nested cards inside cards, no colored left-accent stripes on rounded containers, and no drop shadows on resting surfaces.",
+    "keyCharacteristics": [
+      "Institutional burnt-orange sticky header anchoring the Faculty emblem and active `@go.ugr.es` session across all surfaces.",
+      "Full-bleed two-column workspace on desktop (flush 320px mineral rail plus ruled white schedule sheet) collapsing to a 3-tab top switcher and touch-ready week strip on mobile.",
+      "Zero resting shadows: hierarchy relies on cool mineral daylight layering (`#EAECEF` rail, `#F4F5F7` ground, `#FFFFFF` sheet) and crisp `1px` rules.",
+      "Tabular-numeral timetable rows with a 10-segment architectural seat meter for Cualitativo 2 (`10` concurrent workstations) and a single-bar status track for full-room bookings.",
+      "Native browser accessibility primitives throughout: `<dialog closedby=\"any\">` modals, ARIA `tablist` keyboard navigation, `≥44px`/`48px` touch targets, and WCAG 2.1 AA contrast (`≥4.5:1`)."
+    ],
+    "rules": [
+      {
+        "name": "The Faculty Header Rule",
+        "body": "Faculty Orange anchors the sticky top bar and primary actions, never sprawling across body backgrounds or competing with availability green.",
+        "section": "colors"
+      },
+      {
+        "name": "The Single-Meaning Teal Rule",
+        "body": "Capacity Teal appears exclusively for available room/seat capacity and confirmed valid/approved states—never as a decorative icon or secondary button fill.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Every hour range (`08:00 – 09:00`), date numeral, seat fraction (`6/10 libres`), KPI counter, and character counter sets `font-variant-numeric: tabular-nums` so columns never jitter on state updates.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fixed Step Rule",
+        "body": "Heading sizes use fixed `rem` steps (`32px / 24px / 18px / 16px`, ≥1.25× jump per level) with `text-wrap: balance` on headings and `text-wrap: pretty` on paragraphs.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Every resting surface on the canvas is strictly shadow-free. Only top-layer modals cast an exterior shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the sticky Faculty Orange header (`#B84408`) with the white-framed official Faculty emblem (`logo-facultad.jpg`) as the institutional anchor across all pages.",
+      "Do use tabular numerals (`font-variant-numeric: tabular-nums`) on every time slot, date tile, seat ratio, KPI card, and character counter.",
+      "Do separate surfaces through tonal mineral steps (`#EAECEF` rail, `#F4F5F7` ground, `#FFFFFF` sheets) and `1px` hairlines (`#D4D8E0`) instead of shadows.",
+      "Do enforce native `<dialog closedby=\"any\">` modals with `autofocus` on the safe keep action for destructive actions (`#cancelDialog`, `#deleteBlockDialog`) and reset `dialog.returnValue = ''` on close.",
+      "Do preserve `≥44px` interactive tap targets (`≥48px` on `@media (pointer: coarse)`) and `≥4.5:1` WCAG AA contrast on every text/control state.",
+      "Do respect strict static CSP (`script-src 'self'`, `style-src 'self'`, `font-src 'self'`, `require-trusted-types-for 'script'`) using self-hosted `Schibsted Grotesk` WOFF2 fonts and zero inline styles or `innerHTML`."
+    ],
+    "donts": [
+      "Don't introduce warm cream/beige backgrounds, floating marketing hero banners, or drop shadows on resting containers.",
+      "Don't nest bordered cards inside other bordered cards or attach decorative colored left-border accent bars to rounded elements.",
+      "Don't use Capacity Teal (`#0E6A52`) for decorative accents or non-capacity buttons; reserve it strictly for open availability and verified valid/approved states.",
+      "Don't load external font CDNs, third-party JS CDNs, or raw `:invalid` error styling that flags untouched form inputs before user interaction.",
+      "Don't trigger destructive deletions or cancellations immediately on click or via browser `window.prompt`/`window.confirm` popups."
+    ]
+  }
+}

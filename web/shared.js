@@ -65,14 +65,17 @@ export function getSafeGoogleAvatarUrl(user) {
   }
 }
 
-export function renderUserAvatar(imgEl, fallbackEl, { avatarUrl = '', name = '', email = '' } = {}) {
-  if (!imgEl || !fallbackEl) return;
+export function renderUserAvatar(slotEl, fallbackEl, { avatarUrl = '', name = '', email = '' } = {}) {
+  if (!slotEl || !fallbackEl) return;
   const initial = (String(name || email || '?').trim().charAt(0) || '?').toUpperCase();
   fallbackEl.textContent = initial;
 
+  const removeExistingImg = () => {
+    slotEl.querySelector('img.user-avatar')?.remove();
+  };
+
   const showFallback = () => {
-    imgEl.hidden = true;
-    imgEl.removeAttribute('src');
+    removeExistingImg();
     fallbackEl.hidden = false;
   };
 
@@ -81,11 +84,17 @@ export function renderUserAvatar(imgEl, fallbackEl, { avatarUrl = '', name = '',
     return;
   }
 
-  imgEl.onerror = showFallback;
-  imgEl.alt = name ? `Foto de perfil de ${name}` : 'Foto de perfil';
-  imgEl.src = avatarUrl;
-  imgEl.hidden = false;
+  removeExistingImg();
+  const img = document.createElement('img');
+  img.className = 'user-avatar';
+  img.width = 36;
+  img.height = 36;
+  img.referrerPolicy = 'no-referrer';
+  img.alt = name ? `Foto de perfil de ${name}` : 'Foto de perfil';
+  img.addEventListener('error', showFallback, { once: true });
+  img.src = avatarUrl;
   fallbackEl.hidden = true;
+  slotEl.prepend(img);
 }
 
 export function parseUtcDate(iso) {
@@ -165,9 +174,21 @@ export function formatWeekdayShortEs(iso) {
     .replace('.', '');
 }
 
+export function formatDayNumberEs(iso) {
+  return new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(parseUtcDate(iso));
+}
+
 export function formatDateShortEs(iso) {
-  const [y, m, d] = String(iso || '').split('-');
-  return d && m && y ? `${d}/${m}/${y}` : iso;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return iso;
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(parseUtcDate(iso));
 }
 
 // Fallback de light-dismiss para navegadores sin <dialog closedby="any"> (p. ej. Safari)

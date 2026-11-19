@@ -1,24 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ilustración provisional del Laboratorio cualitativo 2">
-  <defs>
-    <linearGradient id="bgQ2" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fff7f2"/>
-      <stop offset="100%" stop-color="#fed7aa"/>
-    </linearGradient>
-  </defs>
-  <rect width="800" height="500" fill="url(#bgQ2)"/>
-  <circle cx="400" cy="220" r="150" fill="#ffffff" fill-opacity="0.55"/>
-  <g>
-    <rect x="235" y="136" width="54" height="54" rx="12" fill="#f37020"/>
-    <rect x="305" y="136" width="54" height="54" rx="12" fill="#f37020"/>
-    <rect x="375" y="136" width="54" height="54" rx="12" fill="#f37020"/>
-    <rect x="445" y="136" width="54" height="54" rx="12" fill="#f37020"/>
-    <rect x="515" y="136" width="54" height="54" rx="12" fill="#f37020"/>
-    <rect x="235" y="216" width="54" height="54" rx="12" fill="#ffffff" stroke="#c84f08" stroke-width="4"/>
-    <rect x="305" y="216" width="54" height="54" rx="12" fill="#ffffff" stroke="#c84f08" stroke-width="4"/>
-    <rect x="375" y="216" width="54" height="54" rx="12" fill="#ffffff" stroke="#c84f08" stroke-width="4"/>
-    <rect x="445" y="216" width="54" height="54" rx="12" fill="#ffffff" stroke="#c84f08" stroke-width="4"/>
-    <rect x="515" y="216" width="54" height="54" rx="12" fill="#ffffff" stroke="#c84f08" stroke-width="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-label="Esquema arquitectónico del Laboratorio cualitativo 2 de 10 plazas">
+  <rect width="640" height="240" fill="#F4F5F7"/>
+  <g stroke="#DDE1E8" stroke-width="1">
+    <path d="M0 40H640M0 80H640M0 120H640M0 160H640M0 200H640"/>
+    <path d="M80 0V240M160 0V240M240 0V240M320 0V240M400 0V240M480 0V240M560 0V240"/>
   </g>
-  <text x="400" y="330" text-anchor="middle" fill="#0f172a" font-family="system-ui,-apple-system,sans-serif" font-size="26" font-weight="700">Aforo máximo: 10 plazas</text>
-  <text x="400" y="422" text-anchor="middle" fill="#9a3412" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="700" letter-spacing="0.04em">FOTO PENDIENTE · LABORATORIO CUALITATIVO 2</text>
+  <!-- Sala con 10 puestos modulares individuales -->
+  <g fill="none" stroke="#171B20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="64" y="32" width="512" height="176" rx="4" fill="#FFFFFF"/>
+    <!-- Fila superior: 5 plazas -->
+    <rect x="114" y="64" width="68" height="44" rx="4" fill="#E7F4EF" stroke="#0E6A52"/>
+    <rect x="200" y="64" width="68" height="44" rx="4" fill="#E7F4EF" stroke="#0E6A52"/>
+    <rect x="286" y="64" width="68" height="44" rx="4" fill="#E7F4EF" stroke="#0E6A52"/>
+    <rect x="372" y="64" width="68" height="44" rx="4" fill="#E7F4EF" stroke="#0E6A52"/>
+    <rect x="458" y="64" width="68" height="44" rx="4" fill="#E7F4EF" stroke="#0E6A52"/>
+    <!-- Fila inferior: 5 plazas -->
+    <rect x="114" y="132" width="68" height="44" rx="4" fill="#F4F5F7"/>
+    <rect x="200" y="132" width="68" height="44" rx="4" fill="#F4F5F7"/>
+    <rect x="286" y="132" width="68" height="44" rx="4" fill="#F4F5F7"/>
+    <rect x="372" y="132" width="68" height="44" rx="4" fill="#F4F5F7"/>
+    <rect x="458" y="132" width="68" height="44" rx="4" fill="#FFF1E8" stroke="#B84408"/>
+  </g>
 </svg>

@@ -1,23 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ilustración provisional del Laboratorio de radio">
-  <defs>
-    <linearGradient id="bgRadio" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fff7f2"/>
-      <stop offset="100%" stop-color="#ffedd5"/>
-    </linearGradient>
-  </defs>
-  <rect width="800" height="500" fill="url(#bgRadio)"/>
-  <circle cx="400" cy="218" r="142" fill="#f37020" fill-opacity="0.10"/>
-  <circle cx="400" cy="218" r="96" fill="#f37020" fill-opacity="0.16"/>
-  <g fill="none" stroke="#c84f08" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="364" y="128" width="72" height="122" rx="36" fill="#f37020" stroke="#c84f08"/>
-    <line x1="382" y1="166" x2="418" y2="166" stroke="#ffffff" stroke-width="6"/>
-    <line x1="382" y1="188" x2="418" y2="188" stroke="#ffffff" stroke-width="6"/>
-    <line x1="382" y1="210" x2="418" y2="210" stroke="#ffffff" stroke-width="6"/>
-    <path d="M334 216a66 66 0 0 0 132 0"/>
-    <line x1="400" y1="282" x2="400" y2="332"/>
-    <line x1="358" y1="332" x2="442" y2="332"/>
-    <path d="M292 174a120 120 0 0 0 0 88" stroke="#f37020" stroke-width="8"/>
-    <path d="M508 174a120 120 0 0 1 0 88" stroke="#f37020" stroke-width="8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-label="Esquema arquitectónico del Laboratorio de radio">
+  <rect width="640" height="240" fill="#F4F5F7"/>
+  <g stroke="#DDE1E8" stroke-width="1">
+    <path d="M0 40H640M0 80H640M0 120H640M0 160H640M0 200H640"/>
+    <path d="M80 0V240M160 0V240M240 0V240M320 0V240M400 0V240M480 0V240M560 0V240"/>
   </g>
-  <text x="400" y="422" text-anchor="middle" fill="#9a3412" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="700" letter-spacing="0.04em">FOTO PENDIENTE · LABORATORIO DE RADIO</text>
+  <!-- Cabina de locución y control técnico -->
+  <g fill="none" stroke="#171B20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="64" y="32" width="512" height="176" rx="4" fill="#FFFFFF"/>
+    <line x1="396" y1="32" x2="396" y2="208"/>
+    <!-- Ventana acústica entre locutorio y control -->
+    <line x1="396" y1="74" x2="396" y2="166" stroke="#B84408" stroke-width="4"/>
+    <!-- Mesa circular de locución -->
+    <ellipse cx="230" cy="120" rx="88" ry="44" fill="#F4F5F7"/>
+    <!-- 4 puestos de micrófono -->
+    <circle cx="176" cy="74" r="10" fill="#FFFFFF"/>
+    <circle cx="284" cy="74" r="10" fill="#FFFFFF"/>
+    <circle cx="176" cy="166" r="10" fill="#FFFFFF"/>
+    <circle cx="284" cy="166" r="10" fill="#FFFFFF"/>
+    <!-- Consola de control -->
+    <rect x="434" y="72" width="96" height="96" rx="3" fill="#F4F5F7"/>
+    <line x1="454" y1="96" x2="510" y2="96" stroke="#B84408"/>
+    <line x1="454" y1="116" x2="510" y2="116" stroke="#B84408"/>
+    <line x1="454" y1="136" x2="510" y2="136"/>
+    <circle cx="482" cy="152" r="5" fill="#0E6A52" stroke="#0E6A52"/>
+  </g>
+  <g fill="#B84408">
+    <circle cx="198" cy="108" r="4"/>
+    <circle cx="262" cy="108" r="4"/>
+    <circle cx="198" cy="132" r="4"/>
+    <circle cx="262" cy="132" r="4"/>
+  </g>
 </svg>

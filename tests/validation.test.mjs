@@ -11,6 +11,7 @@ import {
   addDays,
   mondayOf,
   formatDateShortEs,
+  formatDayNumberEs,
 } from '../web/shared.js';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -87,6 +88,7 @@ test('utilidades de fechas y semanas ISO', () => {
   assert.equal(mondayOf('2026-11-19'), '2026-11-16'); // Jueves -> Lunes
   assert.equal(mondayOf('2026-11-22'), '2026-11-16'); // Domingo -> Lunes
   assert.equal(formatDateShortEs('2026-11-19'), '19/11/2026');
+  assert.equal(formatDayNumberEs('2026-11-19'), '19');
 });
 
 test('migración SQL y Edge Function existen y contienen restricciones críticas', () => {
@@ -153,21 +155,27 @@ test('frontend evita CDNs externos, inline styles, innerHTML y window.prompt', (
   const privHtml = fs.readFileSync(path.join(root, 'web/privacidad.html'), 'utf8');
 
   assert.ok(fs.existsSync(path.join(root, 'web/vendor/supabase-js.mjs')));
+  assert.ok(fs.existsSync(path.join(root, 'web/assets/fonts/schibsted-grotesk-latin.woff2')));
+  assert.ok(fs.existsSync(path.join(root, 'web/assets/fonts/schibsted-grotesk-latin-ext.woff2')));
   for (const js of [appJs, adminJs]) {
     assert.match(js, /from '\.\/vendor\/supabase-js\.mjs'/);
     assert.match(js, /flowType:\s*'pkce'/);
     assert.doesNotMatch(js, /https:\/\/esm\.sh/);
     assert.doesNotMatch(js, /\.innerHTML\s*=/);
     assert.doesNotMatch(js, /window\.prompt/);
+    assert.doesNotMatch(js, /window\.confirm/);
   }
 
   for (const html of [indexHtml, adminHtml, privHtml]) {
     assert.match(html, /http-equiv="Content-Security-Policy"/);
+    assert.match(html, /name="referrer"\s+content="strict-origin-when-cross-origin"/);
     assert.doesNotMatch(html, /\sstyle="/);
     assert.doesNotMatch(html, /frame-ancestors/); // ignorada en <meta>
+    assert.doesNotMatch(html, /fonts\.googleapis\.com/);
   }
 
   assert.match(adminHtml, /<dialog id="cancelDialog"/);
+  assert.match(adminHtml, /<dialog id="deleteBlockDialog"/);
   const adminHtmlNoComments = adminHtml.replace(/<!--[\s\S]*?-->/g, '');
   assert.doesNotMatch(adminHtmlNoComments, /role="dialog"|aria-modal/);
 });

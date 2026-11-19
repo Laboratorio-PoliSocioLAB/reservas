@@ -4,3 +4,8 @@
 supabase/.temp/
 node_modules/
 .DS_Store
+.impeccable/hook.cache.json
+.impeccable/config.local.json
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/questions/

@@ -1,20 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ilustración provisional del Laboratorio cualitativo 1">
-  <defs>
-    <linearGradient id="bgQ1" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#ffedd5"/>
-    </linearGradient>
-  </defs>
-  <rect width="800" height="500" fill="url(#bgQ1)"/>
-  <circle cx="400" cy="220" r="145" fill="#f37020" fill-opacity="0.10"/>
-  <g fill="none" stroke="#c84f08" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-    <ellipse cx="400" cy="222" rx="116" ry="54" fill="#f37020"/>
-    <circle cx="315" cy="144" r="20" fill="#ffffff"/>
-    <circle cx="400" cy="126" r="20" fill="#ffffff"/>
-    <circle cx="485" cy="144" r="20" fill="#ffffff"/>
-    <circle cx="315" cy="302" r="20" fill="#ffffff"/>
-    <circle cx="400" cy="318" r="20" fill="#ffffff"/>
-    <circle cx="485" cy="302" r="20" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-label="Esquema arquitectónico del Laboratorio cualitativo 1">
+  <rect width="640" height="240" fill="#F4F5F7"/>
+  <g stroke="#DDE1E8" stroke-width="1">
+    <path d="M0 40H640M0 80H640M0 120H640M0 160H640M0 200H640"/>
+    <path d="M80 0V240M160 0V240M240 0V240M320 0V240M400 0V240M480 0V240M560 0V240"/>
   </g>
-  <text x="400" y="422" text-anchor="middle" fill="#9a3412" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="700" letter-spacing="0.04em">FOTO PENDIENTE · LABORATORIO CUALITATIVO 1</text>
+  <!-- Sala de grupos de discusión y entrevistas -->
+  <g fill="none" stroke="#171B20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="64" y="32" width="512" height="176" rx="4" fill="#FFFFFF"/>
+    <!-- Mesa ovalada central de grupo focal -->
+    <rect x="196" y="76" width="248" height="88" rx="44" fill="#F4F5F7"/>
+    <!-- Asientos alrededor de la mesa -->
+    <circle cx="236" cy="54" r="10" fill="#FFFFFF"/>
+    <circle cx="320" cy="50" r="10" fill="#FFFFFF"/>
+    <circle cx="404" cy="54" r="10" fill="#FFFFFF"/>
+    <circle cx="236" cy="186" r="10" fill="#FFFFFF"/>
+    <circle cx="320" cy="190" r="10" fill="#FFFFFF"/>
+    <circle cx="404" cy="186" r="10" fill="#FFFFFF"/>
+    <circle cx="164" cy="120" r="10" fill="#B84408" stroke="#B84408"/>
+    <circle cx="476" cy="120" r="10" fill="#FFFFFF"/>
+    <!-- Punto central de grabación -->
+    <circle cx="320" cy="120" r="12" fill="#FFFFFF" stroke="#B84408"/>
+    <circle cx="320" cy="120" r="4" fill="#B84408" stroke="none"/>
+  </g>
 </svg>

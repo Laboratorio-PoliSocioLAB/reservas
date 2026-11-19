@@ -3,149 +3,288 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#B84408">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://*.googleusercontent.com; connect-src 'self' https://hccmcdqimgyylwcrcaeo.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; require-trusted-types-for 'script'">
-  <title>Panel de gestión · PoliSocioLAB</title>
+  <title>Panel de gestión · PoliSocioLAB (UGR)</title>
+  <link rel="preload" href="assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <div class="masthead">
-      <div>
-        <h1>PoliSocioLAB</h1>
-        <p>Panel de gestión del personal · Facultad de Ciencias Políticas y Sociología (UGR)</p>
+  <a href="#mainContent" class="skip-link visually-hidden">Saltar al contenido principal</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <span class="faculty-emblem">
+          <img
+            class="faculty-logo"
+            width="490"
+            height="130"
+            fetchpriority="high"
+            src="assets/logo-facultad.jpg"
+            alt="Facultad de Ciencias Políticas y Sociología, Universidad de Granada"
+          >
+        </span>
+        <div class="brand-copy">
+          <a href="admin.html" class="brand-wordmark" translate="no">PoliSocioLAB</a>
+          <span class="brand-subtitle">Panel de gestión del personal · Facultad de Ciencias Políticas y Sociología (<span translate="no">UGR</span>)</span>
+        </div>
       </div>
-      <img class="faculty-logo" width="490" height="130"
-        src="assets/logo-facultad.jpg"
-        alt="Facultad de Ciencias Políticas y Sociología">
+
+      <div id="topbarStaffActions" class="topbar-actions" hidden>
+        <div class="session-identity">
+          <span id="staffAvatarSlot" class="user-avatar-slot">
+            <span id="staffAvatarFallback" class="user-avatar-fallback" aria-hidden="true"></span>
+          </span>
+          <div class="session-text">
+            <strong id="staffName"></strong>
+            <small id="staffAccount" translate="no"></small>
+          </div>
+        </div>
+        <a class="topbar-btn" href="index.html">Portal de reservas</a>
+        <button id="logoutBtn" type="button" class="topbar-btn">Cerrar sesión</button>
+      </div>
     </div>
   </header>
 
-  <main>
+  <div class="banner-strip">
     <div id="demoBanner" class="demo-banner" hidden>
       <strong>Supabase no configurado:</strong> configura <code>web/config.js</code> siguiendo <code>README.md</code> para activar el acceso del personal y la gestión real de solicitudes.
     </div>
-
     <p id="status" class="notice" role="status" aria-live="polite" hidden></p>
+  </div>
 
-    <section id="loginSection" aria-labelledby="loginTitle" hidden>
-      <h2 id="loginTitle">Acceso del personal autorizado</h2>
-      <p class="muted">Inicia sesión con tu cuenta de Google autorizada del personal de PoliSocioLAB (<code>@go.ugr.es</code>).</p>
-
-      <div class="actions">
-        <button id="googleStaffLoginBtn" type="button" class="primary google-btn">
-          <span class="google-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.29A7.19 7.19 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.39l4-3.1z"/>
-              <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.61l4 3.1c.95-2.84 3.6-4.95 6.72-4.95z"/>
-            </svg>
-          </span>
-          <span>Entrar con Google (@go.ugr.es)</span>
-        </button>
+  <main id="mainContent" tabindex="-1">
+    <section id="unconfiguredState" class="gate-shell" aria-labelledby="unconfiguredTitle" hidden>
+      <div class="gate-compact">
+        <h1 id="unconfiguredTitle">Panel de gestión sin conexión a Supabase</h1>
+        <p class="muted">
+          Para activar la revisión de solicitudes y los bloqueos de horario, completa <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> en <code>web/config.js</code> siguiendo <code>README.md</code>.
+        </p>
+        <div class="gate-actions">
+          <a class="btn primary" href="index.html">Abrir modo demostración en el portal</a>
+        </div>
       </div>
     </section>
 
-    <div id="adminPanel" hidden>
-      <div class="bar">
-        <div class="session-identity">
-          <img id="staffAvatar" class="user-avatar" width="38" height="38" alt="" referrerpolicy="no-referrer" hidden>
-          <span id="staffAvatarFallback" class="user-avatar-fallback" aria-hidden="true" hidden></span>
-          <div class="session-text">
-            <strong id="staffName"></strong>
-            <small id="staffAccount"></small>
-          </div>
-        </div>
-        <div class="actions">
-          <a class="btn" href="index.html">Ver calendario público</a>
-          <button id="refreshAll" type="button">Actualizar</button>
-          <button id="logoutBtn" type="button">Cerrar sesión</button>
+    <section id="loginSection" class="gate-shell" aria-labelledby="loginTitle" hidden>
+      <div class="gate-compact">
+        <h1 id="loginTitle">Acceso del personal autorizado</h1>
+        <p class="muted">
+          Inicia sesión con tu cuenta institucional de Google autorizada del personal de <span translate="no">PoliSocioLAB</span> (<code translate="no">@go.ugr.es</code>) para revisar solicitudes y gestionar bloqueos.
+        </p>
+        <div class="gate-actions">
+          <button id="googleStaffLoginBtn" type="button" class="primary google-btn">
+            <span class="google-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.29A7.19 7.19 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.39l4-3.1z"/>
+                <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.61l4 3.1c.95-2.84 3.6-4.95 6.72-4.95z"/>
+              </svg>
+            </span>
+            <span>Entrar con Google (<span translate="no">@go.ugr.es</span>)</span>
+          </button>
+          <a class="btn" href="index.html">Volver al portal</a>
         </div>
       </div>
+    </section>
 
-      <div class="tabs" role="tablist" aria-label="Secciones de gestión">
-        <button id="tabPending" type="button" role="tab" aria-selected="true" aria-controls="panelPending">
-          Pendientes (<span id="pendingCount">0</span>)
-        </button>
-        <button id="tabHistory" type="button" role="tab" aria-selected="false" aria-controls="panelHistory">
-          Agenda e historial
-        </button>
-        <button id="tabBlocks" type="button" role="tab" aria-selected="false" aria-controls="panelBlocks">
-          Bloqueos de horario
-        </button>
-      </div>
+    <div id="adminPanel" class="workspace-shell" hidden>
+      <aside class="rail" aria-label="Secciones de gestión">
+        <div class="rail-heading">Gestión de reservas</div>
 
-      <section id="panelPending" role="tabpanel" aria-labelledby="tabPending">
-        <h2>Solicitudes pendientes de revisión</h2>
-        <div id="pendingList"><p class="muted">Cargando…</p></div>
-      </section>
+        <div class="room-switcher" role="tablist" aria-label="Secciones del panel">
+          <button id="tabPending" type="button" class="room-tab" role="tab" tabindex="0" aria-selected="true" aria-controls="panelPending">
+            <span class="room-tab-head">
+              <span class="room-tab-title">Pendientes</span>
+              <span id="pendingCount" class="room-tab-count">0</span>
+            </span>
+            <span class="room-tab-meta">Solicitudes por aprobar o rechazar</span>
+          </button>
 
-      <section id="panelHistory" role="tabpanel" aria-labelledby="tabHistory" hidden>
-        <div class="bar">
-          <h2>Agenda e historial de reservas</h2>
-          <div class="actions">
-            <label for="statusFilter" class="inline-label">Estado</label>
-            <select id="statusFilter" class="auto-select">
-              <option value="ALL">Todos</option>
-              <option value="APROBADA">Aprobadas</option>
-              <option value="RECHAZADA">Rechazadas</option>
-              <option value="CANCELADA">Canceladas</option>
-            </select>
-          </div>
+          <button id="tabHistory" type="button" class="room-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panelHistory">
+            <span class="room-tab-head">
+              <span class="room-tab-title">Agenda e historial</span>
+              <span id="historyCount" class="room-tab-count">0</span>
+            </span>
+            <span class="room-tab-meta">Aprobadas, rechazadas y canceladas</span>
+          </button>
+
+          <button id="tabBlocks" type="button" class="room-tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panelBlocks">
+            <span class="room-tab-head">
+              <span class="room-tab-title">Bloqueos de horario</span>
+              <span id="blocksCount" class="room-tab-count">0</span>
+            </span>
+            <span class="room-tab-meta">Mantenimiento y reservas docentes</span>
+          </button>
         </div>
-        <div id="historyList"><p class="muted">Cargando…</p></div>
-      </section>
 
-      <section id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
-        <h2>Bloqueos de mantenimiento o eventos</h2>
-        <p class="muted">Impide nuevas reservas en un laboratorio durante una franja horaria.</p>
+        <div class="rail-rules">
+          <strong>Operativa de revisión</strong>
+          <span>Al aprobar, el sistema comprueba solapamientos en PostgreSQL y envía el correo con archivo <code>.ics</code>.</span>
+          <span>Si un correo falla, puedes reintentarlo desde «Agenda e historial».</span>
+        </div>
+      </aside>
 
-        <form id="blockForm" class="block-form">
-          <div class="grid-2">
-            <div class="field">
-              <label for="blockTarget">Laboratorio</label>
-              <select id="blockTarget" required>
-                <option value="RADIO">Laboratorio de radio</option>
-                <option value="CUALITATIVO1">Laboratorio cualitativo 1</option>
-                <option value="CUALITATIVO2">Laboratorio cualitativo 2 (aforo completo)</option>
-              </select>
+      <div class="work-main">
+        <div class="work-main-inner">
+          <div class="work-header">
+            <div class="work-header-copy">
+              <h1 id="adminSectionTitle">Solicitudes pendientes de revisión</h1>
+              <p id="adminSectionSub" class="work-header-sub">Revisa cada petición y añade un comentario opcional antes de aprobar o rechazar.</p>
             </div>
-            <div class="field">
-              <label for="blockDate">Fecha</label>
-              <input id="blockDate" type="date" required>
-            </div>
-            <div class="field">
-              <label for="blockStart">Desde</label>
-              <input id="blockStart" type="time" value="08:00" required>
-            </div>
-            <div class="field">
-              <label for="blockEnd">Hasta</label>
-              <input id="blockEnd" type="time" value="21:00" required>
+            <div class="work-toolbar">
+              <button id="refreshAll" type="button">Actualizar datos</button>
             </div>
           </div>
-          <div class="field">
-            <label for="blockReason">Motivo (interno)</label>
-            <input id="blockReason" type="text" maxlength="200" placeholder="Ej.: mantenimiento de micrófonos, clase reservada…">
-          </div>
-          <button id="addBlockBtn" type="submit" class="primary">Añadir bloqueo</button>
-        </form>
 
-        <h3>Bloqueos activos</h3>
-        <div id="blocksList"><p class="muted">Cargando…</p></div>
-      </section>
+          <section class="kpi-strip" aria-label="Resumen operativo">
+            <button id="kpiPendingBtn" type="button" class="kpi-btn" data-tone="warn">
+              <strong id="kpiPending">0</strong>
+              <span>Pendientes de revisión</span>
+            </button>
+            <button id="kpiTodayBtn" type="button" class="kpi-btn">
+              <strong id="kpiApprovedToday">0</strong>
+              <span>Aprobadas para hoy</span>
+            </button>
+            <button id="kpiMailErrBtn" type="button" class="kpi-btn" data-tone="error">
+              <strong id="kpiMailErrors">0</strong>
+              <span>Avisos con error de envío</span>
+            </button>
+          </section>
+
+          <section id="panelPending" role="tabpanel" aria-labelledby="tabPending">
+            <div id="pendingList" class="sheet">
+              <div class="skeleton-row">
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="panelHistory" role="tabpanel" aria-labelledby="tabHistory" hidden>
+            <search>
+              <div class="admin-filters">
+                <div class="filter-field">
+                  <label for="historySearch">Buscar por solicitante, correo o actividad</label>
+                  <input
+                    id="historySearch"
+                    name="q"
+                    type="search"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="Ej.: nombre, @go.ugr.es o TFG…"
+                  >
+                </div>
+                <div class="filter-field narrow">
+                  <label for="statusFilter">Estado</label>
+                  <select id="statusFilter" name="status" autocomplete="off">
+                    <option value="ALL">Todos</option>
+                    <option value="APROBADA">Aprobadas</option>
+                    <option value="RECHAZADA">Rechazadas</option>
+                    <option value="CANCELADA">Canceladas</option>
+                    <option value="MAIL_ERROR">Error de correo</option>
+                  </select>
+                </div>
+              </div>
+            </search>
+
+            <div id="historyList" class="sheet">
+              <div class="skeleton-row">
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
+            <div class="block-form-sheet">
+              <h2 id="blockFormTitle">Nuevo bloqueo de mantenimiento o docencia</h2>
+              <p class="hint">Impide nuevas solicitudes y aprobaciones en el laboratorio durante la franja elegida.</p>
+
+              <form id="blockForm" novalidate aria-labelledby="blockFormTitle">
+                <div class="form-grid-2">
+                  <div class="field">
+                    <label for="blockTarget">Laboratorio</label>
+                    <select id="blockTarget" name="target" autocomplete="off" required>
+                      <option value="RADIO">Laboratorio de radio</option>
+                      <option value="CUALITATIVO1">Laboratorio cualitativo 1</option>
+                      <option value="CUALITATIVO2">Laboratorio cualitativo 2 (aforo completo)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="blockDate">Fecha</label>
+                    <input id="blockDate" name="block_date" type="date" autocomplete="off" required>
+                  </div>
+                  <div class="field">
+                    <label for="blockStart">Desde</label>
+                    <input id="blockStart" name="start_time" type="time" value="08:00" autocomplete="off" required>
+                  </div>
+                  <div class="field">
+                    <label for="blockEnd">Hasta</label>
+                    <input id="blockEnd" name="end_time" type="time" value="21:00" autocomplete="off" required data-error="blockTimeError">
+                    <div id="blockTimeError" class="error-msg">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <span>La hora de fin debe ser posterior a la hora de inicio.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="blockReason">Motivo interno</label>
+                  <input
+                    id="blockReason"
+                    name="reason"
+                    type="text"
+                    maxlength="200"
+                    autocomplete="off"
+                    placeholder="Ej.: mantenimiento de micrófonos, seminario reservado…"
+                  >
+                </div>
+                <button id="addBlockBtn" type="submit" class="primary">Guardar bloqueo</button>
+              </form>
+            </div>
+
+            <div class="sheet-header">
+              <h2 id="activeBlocksTitle">Bloqueos activos</h2>
+            </div>
+            <div id="blocksList" class="sheet">
+              <div class="skeleton-row">
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   </main>
 
-  <footer>
-    <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
-    <span><a href="privacidad.html">Privacidad</a> · <a href="index.html">Volver al portal de reservas</a></span>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span><strong translate="no">PoliSocioLAB</strong> · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
+      <nav class="footer-nav" aria-label="Enlaces institucionales">
+        <a href="privacidad.html">Privacidad</a>
+        <a href="index.html">Portal de reservas</a>
+      </nav>
+    </div>
   </footer>
 
-  <!-- Diálogo modal nativo de confirmación para cancelar reserva (sin role="dialog" ni aria-modal redundantes) -->
+  <!-- Diálogo modal nativo de confirmación para cancelar reserva -->
   <dialog id="cancelDialog" closedby="any" aria-labelledby="cancelTitle">
-    <h2 id="cancelTitle">Cancelar reserva aprobada</h2>
-    <p id="cancelMeta" class="muted"></p>
+    <div class="dialog-head">
+      <h2 id="cancelTitle">Cancelar reserva aprobada</h2>
+      <p id="cancelMeta" class="dialog-meta"></p>
+    </div>
     <form id="cancelForm" method="dialog">
       <div class="field">
         <label for="cancelReason">Motivo de cancelación (opcional)</label>
@@ -153,13 +292,30 @@
         <textarea
           id="cancelReason"
           name="reason"
+          autocomplete="off"
           maxlength="500"
+          placeholder="Ej.: incidencia técnica en la cabina, cambio de horario…"
           aria-describedby="cancelReasonHint"
         ></textarea>
       </div>
       <div class="dialog-actions">
         <button type="submit" value="keep" autofocus>Mantener reserva</button>
-        <button type="submit" value="confirm" class="danger">Confirmar cancelación</button>
+        <button type="submit" value="confirm" class="danger-solid">Confirmar cancelación</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Diálogo modal nativo de confirmación para eliminar bloqueo -->
+  <dialog id="deleteBlockDialog" closedby="any" aria-labelledby="deleteBlockTitle">
+    <div class="dialog-head">
+      <h2 id="deleteBlockTitle">Eliminar bloqueo de horario</h2>
+      <p id="deleteBlockMeta" class="dialog-meta"></p>
+    </div>
+    <form method="dialog">
+      <p class="muted">Al eliminar este bloqueo, la franja volverá a quedar disponible para nuevas solicitudes.</p>
+      <div class="dialog-actions">
+        <button type="submit" value="keep" autofocus>Mantener bloqueo</button>
+        <button type="submit" value="confirm" class="danger-solid">Eliminar bloqueo</button>
       </div>
     </form>
   </dialog>

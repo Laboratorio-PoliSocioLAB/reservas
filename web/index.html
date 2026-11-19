@@ -3,177 +3,293 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#B84408">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://*.googleusercontent.com; connect-src 'self' https://hccmcdqimgyylwcrcaeo.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; require-trusted-types-for 'script'">
-  <title>PoliSocioLAB · Reservas de laboratorios</title>
+  <title>Reservas de laboratorios · PoliSocioLAB (UGR)</title>
   <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
+  <link rel="preload" href="assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <div class="masthead">
-      <div>
-        <h1>PoliSocioLAB</h1>
-        <p>Reservas de laboratorios · Facultad de Ciencias Políticas y Sociología (UGR)</p>
+  <a href="#mainContent" class="skip-link visually-hidden">Saltar al contenido principal</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <span class="faculty-emblem">
+          <img
+            class="faculty-logo"
+            width="490"
+            height="130"
+            fetchpriority="high"
+            src="assets/logo-facultad.jpg"
+            alt="Facultad de Ciencias Políticas y Sociología, Universidad de Granada"
+          >
+        </span>
+        <div class="brand-copy">
+          <a href="index.html" class="brand-wordmark" translate="no">PoliSocioLAB</a>
+          <span class="brand-subtitle">Reservas de laboratorios · Facultad de Ciencias Políticas y Sociología (<span translate="no">UGR</span>)</span>
+        </div>
       </div>
-      <img class="faculty-logo" width="490" height="130"
-        src="assets/logo-facultad.jpg"
-        alt="Facultad de Ciencias Políticas y Sociología">
+
+      <div id="topbarSession" class="topbar-actions" hidden>
+        <div class="session-identity">
+          <span id="sessionAvatarSlot" class="user-avatar-slot">
+            <span id="sessionAvatarFallback" class="user-avatar-fallback" aria-hidden="true"></span>
+          </span>
+          <div class="session-text">
+            <strong id="sessionName"></strong>
+            <small id="sessionEmail" translate="no"></small>
+          </div>
+        </div>
+        <button id="logoutBtn" type="button" class="topbar-btn">Cerrar sesión</button>
+      </div>
     </div>
   </header>
 
-  <main>
+  <div class="banner-strip">
     <div id="demoBanner" class="demo-banner" hidden>
-      <strong>Modo demostración local:</strong> todavía no has conectado tu proyecto de Supabase en <code>web/config.js</code>. Puedes probar la interfaz completa con datos simulados; sigue el archivo <code>README.md</code> para activar la base de datos y los avisos reales.
+      <strong>Modo demostración local:</strong> todavía no has conectado tu proyecto de Supabase en <code>web/config.js</code>. Los datos de disponibilidad que ves son simulados para probar la interfaz.
+    </div>
+    <p id="status" class="notice" role="status" aria-live="polite" data-kind="info">Comprobando sesión…</p>
+  </div>
+
+  <main id="mainContent" tabindex="-1">
+    <!-- Puerta de acceso institucional (@go.ugr.es) -->
+    <div id="authGate" class="gate-shell" hidden>
+      <div class="gate-grid">
+        <section class="gate-primary" aria-labelledby="authGateTitle">
+          <h1 id="authGateTitle">Reserva tu laboratorio en <span translate="no">PoliSocioLAB</span></h1>
+          <p class="lead">
+            Consulta los huecos libres en tiempo real y solicita turnos de 1 a 6 horas consecutivas en los laboratorios de la Facultad.
+          </p>
+          <p>
+            El acceso está restringido a la comunidad universitaria de Granada mediante cuenta institucional de Google <code translate="no">@go.ugr.es</code>.
+          </p>
+          <div class="gate-actions">
+            <button id="googleLoginBtn" type="button" class="primary google-btn">
+              <span class="google-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.29A7.19 7.19 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.39l4-3.1z"/>
+                  <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.61l4 3.1c.95-2.84 3.6-4.95 6.72-4.95z"/>
+                </svg>
+              </span>
+              <span>Entrar con Google (<span translate="no">@go.ugr.es</span>)</span>
+            </button>
+          </div>
+        </section>
+
+        <aside class="gate-directory" aria-labelledby="gateSpacesTitle">
+          <h2 id="gateSpacesTitle">Espacios disponibles</h2>
+          <ul class="gate-space-list">
+            <li class="gate-space-item">
+              <img src="assets/space-radio.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio de radio">
+              <div class="gate-space-copy">
+                <strong>Laboratorio de radio</strong>
+                <span>Sala completa · Locución y control técnico</span>
+              </div>
+            </li>
+            <li class="gate-space-item">
+              <img src="assets/space-cualitativo1.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio cualitativo 1">
+              <div class="gate-space-copy">
+                <strong>Laboratorio cualitativo 1</strong>
+                <span>Sala completa · Grupos de discusión y entrevistas</span>
+              </div>
+            </li>
+            <li class="gate-space-item">
+              <img src="assets/space-cualitativo2.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio cualitativo 2 de 10 plazas">
+              <div class="gate-space-copy">
+                <strong>Laboratorio cualitativo 2</strong>
+                <span>10 plazas simultáneas · Aforo en vivo</span>
+              </div>
+            </li>
+          </ul>
+          <p class="gate-footnote">
+            Horario lectivo de lunes a viernes, de 08:00 a 21:00. Las solicitudes quedan pendientes hasta confirmación por correo del personal del laboratorio.
+          </p>
+        </aside>
+      </div>
     </div>
 
-    <p id="status" class="notice" role="status" aria-live="polite" data-kind="info">Comprobando sesión…</p>
+    <!-- Espacio operativo principal: salas + semana + horarios en una sola vista -->
+    <div id="appContent" class="workspace-shell" hidden>
+      <aside class="rail" aria-label="Selector de laboratorios">
+        <div class="rail-heading">Espacios del laboratorio</div>
 
-    <section id="authGate" class="auth-gate" aria-labelledby="authGateTitle" hidden>
-      <h2 id="authGateTitle">Acceso comunidad universitaria UGR</h2>
-      <p>
-        El sistema de reservas de <strong>PoliSocioLAB</strong> está limitado a usuarios de la Universidad de
-        Granada con cuenta institucional <strong>@go.ugr.es</strong>.
-      </p>
-      <p class="muted">
-        Inicia sesión con Google seleccionando tu cuenta <code>@go.ugr.es</code> para elegir espacio, consultar disponibilidad y solicitar reserva.
-      </p>
-      <div class="actions">
-        <button id="googleLoginBtn" type="button" class="primary google-btn">
-          <span class="google-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.62v3h3.87c2.26-2.08 3.56-5.15 3.56-8.65z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.29A7.19 7.19 0 0 1 4.9 12c0-.79.14-1.56.38-2.29v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.39l4-3.1z"/>
-              <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.61l4 3.1c.95-2.84 3.6-4.95 6.72-4.95z"/>
-            </svg>
-          </span>
-          <span>Entrar con Google (@go.ugr.es)</span>
-        </button>
-      </div>
-    </section>
+        <div id="roomSwitcher" class="room-switcher" role="group" aria-label="Elegir laboratorio">
+          <button type="button" class="room-tab" data-room="RADIO" aria-pressed="true">
+            <span class="room-tab-head">
+              <span class="room-tab-title">
+                <svg class="room-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="2" width="6" height="11" rx="3"/>
+                  <path d="M5 10a7 7 0 0 0 14 0"/>
+                  <line x1="12" y1="17" x2="12" y2="22"/>
+                  <line x1="8" y1="22" x2="16" y2="22"/>
+                </svg>
+                <span>Laboratorio de radio</span>
+              </span>
+              <span class="room-tab-count" data-room-count="RADIO">—</span>
+            </span>
+            <span class="room-tab-meta">Sala completa · 08:00–21:00</span>
+          </button>
 
-    <div id="appContent" hidden>
-      <div id="sessionBar" class="session-bar">
-        <div class="session-identity">
-          <img id="sessionAvatar" class="user-avatar" width="38" height="38" alt="" referrerpolicy="no-referrer" hidden>
-          <span id="sessionAvatarFallback" class="user-avatar-fallback" aria-hidden="true" hidden></span>
-          <div class="session-text">
-            <strong id="sessionName"></strong>
-            <small id="sessionEmail"></small>
-          </div>
+          <button type="button" class="room-tab" data-room="CUALITATIVO1" aria-pressed="false">
+            <span class="room-tab-head">
+              <span class="room-tab-title">
+                <svg class="room-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="4" y="8" width="16" height="8" rx="4"/>
+                  <circle cx="8" cy="4" r="1.5"/>
+                  <circle cx="16" cy="4" r="1.5"/>
+                  <circle cx="8" cy="20" r="1.5"/>
+                  <circle cx="16" cy="20" r="1.5"/>
+                </svg>
+                <span>Laboratorio cualitativo 1</span>
+              </span>
+              <span class="room-tab-count" data-room-count="CUALITATIVO1">—</span>
+            </span>
+            <span class="room-tab-meta">Sala completa · 08:00–21:00</span>
+          </button>
+
+          <button type="button" class="room-tab" data-room="CUALITATIVO2" aria-pressed="false">
+            <span class="room-tab-head">
+              <span class="room-tab-title">
+                <svg class="room-tab-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="7" height="7" rx="1.5"/>
+                  <rect x="14" y="4" width="7" height="7" rx="1.5"/>
+                  <rect x="3" y="13" width="7" height="7" rx="1.5"/>
+                  <rect x="14" y="13" width="7" height="7" rx="1.5"/>
+                </svg>
+                <span>Laboratorio cualitativo 2</span>
+              </span>
+              <span class="room-tab-count" data-room-count="CUALITATIVO2">—</span>
+            </span>
+            <span class="room-tab-meta">Aforo compartido · 10 plazas</span>
+            <span id="railCualitativo2Meter" class="seat-meter compact" aria-hidden="true"></span>
+          </button>
         </div>
-        <div class="actions">
-          <button id="logoutBtn" type="button">Cambiar cuenta / Cerrar sesión</button>
+
+        <figure class="rail-plan">
+          <img id="detailSpaceImg" src="assets/space-radio.svg" width="640" height="240" alt="Esquema arquitectónico del Laboratorio de radio">
+          <figcaption id="detailSpaceCaption">Cabina de locución y control técnico · Reserva de sala completa.</figcaption>
+        </figure>
+
+        <div class="rail-rules">
+          <strong>Normas de reserva</strong>
+          <span>Lunes a viernes, de 08:00 a 21:00.</span>
+          <span>Turnos de 1 a 6 horas consecutivas dentro de los próximos 60 días.</span>
+          <span>Confirmación por correo con archivo de calendario (<code>.ics</code>).</span>
         </div>
-      </div>
+      </aside>
 
-      <!-- Paso 1: Menú de selección de espacio con fotos -->
-      <section id="spaceMenuView" class="space-menu-section" aria-labelledby="spaceMenuTitle">
-        <h2 id="spaceMenuTitle" tabindex="-1">Selecciona un espacio</h2>
-        <p class="muted">Elige el laboratorio que quieres reservar para consultar sus fechas y horarios disponibles.</p>
-
-        <div class="space-grid">
-          <article class="space-card" data-room="RADIO">
-            <img src="assets/space-radio.svg" width="800" height="500" alt="Laboratorio de radio de PoliSocioLAB">
-            <h3>Laboratorio de radio</h3>
-            <p class="muted">Reserva del espacio completo · Lunes a viernes, 08:00–21:00.</p>
-            <footer>
-              <button type="button" class="primary card-action" data-room="RADIO">Elegir fecha y hora</button>
-            </footer>
-          </article>
-
-          <article class="space-card" data-room="CUALITATIVO1">
-            <img src="assets/space-cualitativo1.svg" width="800" height="500" alt="Laboratorio cualitativo 1 de PoliSocioLAB">
-            <h3>Laboratorio cualitativo 1</h3>
-            <p class="muted">Reserva del espacio completo · Lunes a viernes, 08:00–21:00.</p>
-            <footer>
-              <button type="button" class="primary card-action" data-room="CUALITATIVO1">Elegir fecha y hora</button>
-            </footer>
-          </article>
-
-          <article class="space-card" data-room="CUALITATIVO2">
-            <img src="assets/space-cualitativo2.svg" width="800" height="500" alt="Laboratorio cualitativo 2 de PoliSocioLAB">
-            <h3>Laboratorio cualitativo 2</h3>
-            <p class="muted">Aforo máximo de 10 plazas · Lunes a viernes, 08:00–21:00.</p>
-            <footer>
-              <button type="button" class="primary card-action" data-room="CUALITATIVO2">Elegir fecha y hora</button>
-            </footer>
-          </article>
-        </div>
-      </section>
-
-      <!-- Paso 2: Calendario y horarios del espacio elegido -->
-      <div id="spaceDetailView" hidden>
-        <section class="space-detail-hero" aria-labelledby="detailSpaceTitle">
-          <div class="bar">
-            <button id="backToSpaces" type="button">← Cambiar espacio</button>
-            <button id="refresh" type="button">Actualizar</button>
-          </div>
-          <div class="space-detail-header">
-            <img id="detailSpaceImg" src="assets/space-radio.svg" width="800" height="500" alt="">
-            <div>
-              <h2 id="detailSpaceTitle" tabindex="-1"></h2>
-              <p id="detailSpaceSubtitle" class="muted"></p>
+      <div class="work-main">
+        <div class="work-main-inner">
+          <div class="work-header">
+            <div class="work-header-copy">
+              <h1 id="detailSpaceTitle" tabindex="-1">Laboratorio de radio</h1>
+              <p id="detailSpaceSubtitle" class="work-header-sub">Reserva del espacio completo · Lunes a viernes, 08:00–21:00.</p>
+            </div>
+            <div class="work-toolbar">
+              <div class="date-jump">
+                <label for="date">Fecha</label>
+                <input type="date" id="date" name="date" autocomplete="off" required>
+              </div>
+              <button id="today" type="button">Hoy</button>
+              <button id="refresh" type="button">Actualizar</button>
             </div>
           </div>
-        </section>
 
-        <section aria-labelledby="calendarTitle">
-          <h3 id="calendarTitle">Fecha</h3>
-          <div class="date-nav">
-            <button id="prev" type="button" aria-label="Semana anterior">←</button>
-            <button id="today" type="button">Hoy</button>
-            <button id="next" type="button" aria-label="Semana siguiente">→</button>
-            <label for="date" class="inline-label">Ir a fecha</label>
-            <input type="date" id="date" required>
+          <nav class="week-controls" aria-label="Navegación semanal">
+            <button id="prev" type="button" class="week-nav-btn" aria-label="Semana anterior">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <div id="week" class="week-strip" role="group" aria-label="Días de la semana"></div>
+            <button id="next" type="button" class="week-nav-btn" aria-label="Semana siguiente">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+          </nav>
+
+          <div class="sheet-header">
+            <h2 id="selectedDate" class="sheet-date-label">Disponibilidad</h2>
+            <span id="slotsSummary" class="sheet-summary"></span>
           </div>
-          <div id="week" class="week" aria-label="Días de la semana"></div>
-          <strong id="selectedDate"></strong>
-        </section>
 
-        <section aria-labelledby="slotsTitle">
-          <h3 id="slotsTitle">Horarios disponibles</h3>
-          <div id="spaceSlots" class="slot-grid"><p class="muted">Cargando…</p></div>
-        </section>
+          <div id="spaceSlots" class="sheet" aria-live="polite">
+            <div class="skeleton-row">
+              <div class="skeleton-bar"></div>
+              <div class="skeleton-bar"></div>
+              <div class="skeleton-bar"></div>
+            </div>
+            <div class="skeleton-row">
+              <div class="skeleton-bar"></div>
+              <div class="skeleton-bar"></div>
+              <div class="skeleton-bar"></div>
+            </div>
+            <div class="skeleton-row">
+              <div class="skeleton-bar"></div>
+              <div class="skeleton-bar"></div>
+              <div class="skeleton-bar"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
-  <footer>
-    <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
-    <span>
-      <a href="privacidad.html">Privacidad</a> ·
-      <a href="admin.html">Acceso personal (revisión)</a>
-    </span>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span><strong translate="no">PoliSocioLAB</strong> · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
+      <nav class="footer-nav" aria-label="Enlaces institucionales">
+        <a href="privacidad.html">Privacidad</a>
+        <a href="admin.html">Acceso personal (revisión)</a>
+      </nav>
+    </div>
   </footer>
 
-  <!-- Diálogo modal nativo (sin role="dialog" ni aria-modal redundantes) -->
+  <!-- Diálogo modal nativo de solicitud -->
   <dialog id="requestDialog" closedby="any" aria-labelledby="requestTitle">
-    <h2 id="requestTitle">Solicitar reserva</h2>
-    <p id="requestMeta" class="muted"></p>
+    <div class="dialog-head">
+      <h2 id="requestTitle">Solicitar reserva</h2>
+      <p id="requestMeta" class="dialog-meta"></p>
+    </div>
 
     <form id="requestForm" novalidate>
       <div class="field">
         <label for="duration">Duración</label>
         <span id="durationHint" class="hint">Puedes reservar varias horas consecutivas mientras el espacio esté libre.</span>
-        <select id="duration" name="duration" required aria-describedby="durationHint"></select>
+        <select id="duration" name="duration" autocomplete="off" required aria-describedby="durationHint"></select>
       </div>
 
       <div class="field">
         <label for="purpose">Motivo o asignatura</label>
-        <span id="purposeHint" class="hint">Ej.: práctica de radio, entrevista de TFG, grupo de discusión…</span>
+        <span id="purposeHint" class="hint">Indica brevemente la práctica, entrevista de TFG o grupo de discusión.</span>
         <textarea
           id="purpose"
           name="purpose"
+          autocomplete="off"
           required
           minlength="3"
           maxlength="400"
+          placeholder="Ej.: grabación de podcast de asignatura, entrevista de TFG…"
           aria-describedby="purposeHint"
           data-error="purposeError"
         ></textarea>
         <div id="purposeError" class="error-msg">
-          <span role="img" aria-label="Error">❌</span> Indica brevemente el motivo o la asignatura de la reserva.
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>Escribe al menos 3 caracteres válidos indicando el motivo o la asignatura.</span>
+        </div>
+        <div class="field-footer">
+          <span id="purposeCounter" class="char-counter">0 / 400</span>
         </div>
       </div>
 

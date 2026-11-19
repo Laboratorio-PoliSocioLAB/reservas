@@ -3,82 +3,91 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#B84408">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
-  <title>Política de privacidad · PoliSocioLAB</title>
+  <title>Política de privacidad · PoliSocioLAB (UGR)</title>
+  <link rel="preload" href="assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <div class="masthead">
-      <div>
-        <h1>PoliSocioLAB</h1>
-        <p>Política de privacidad · Facultad de Ciencias Políticas y Sociología (UGR)</p>
+  <a href="#mainContent" class="skip-link visually-hidden">Saltar al contenido principal</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <span class="faculty-emblem">
+          <img
+            class="faculty-logo"
+            width="490"
+            height="130"
+            fetchpriority="high"
+            src="assets/logo-facultad.jpg"
+            alt="Facultad de Ciencias Políticas y Sociología, Universidad de Granada"
+          >
+        </span>
+        <div class="brand-copy">
+          <a href="index.html" class="brand-wordmark" translate="no">PoliSocioLAB</a>
+          <span class="brand-subtitle">Política de privacidad · Facultad de Ciencias Políticas y Sociología (<span translate="no">UGR</span>)</span>
+        </div>
       </div>
-      <img class="faculty-logo" width="490" height="130"
-        src="assets/logo-facultad.jpg"
-        alt="Facultad de Ciencias Políticas y Sociología">
+
+      <div class="topbar-actions">
+        <a class="topbar-btn" href="index.html">Portal de reservas</a>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section>
-      <h2>Política de privacidad del sistema de reservas</h2>
-      <p>
-        El portal de reservas de <strong>PoliSocioLAB</strong> (Facultad de Ciencias Políticas y Sociología,
-        Universidad de Granada) está restringido a la comunidad universitaria mediante inicio de sesión con
-        cuentas institucionales <code>@go.ugr.es</code>.
+  <main id="mainContent" class="read-shell" tabindex="-1">
+    <article class="read-sheet">
+      <h1>Política de privacidad</h1>
+      <p class="read-lead">
+        El portal de reservas de <strong translate="no">PoliSocioLAB</strong> (Facultad de Ciencias Políticas y Sociología, Universidad de Granada) está restringido a la comunidad universitaria mediante inicio de sesión con cuentas institucionales <code translate="no">@go.ugr.es</code>.
       </p>
 
-      <h3>Responsable del tratamiento y legitimación</h3>
+      <h2 id="responsable">Responsable del tratamiento y legitimación</h2>
       <p>
-        El responsable del tratamiento es la <strong>Universidad de Granada</strong> (a través de la Facultad de
-        Ciencias Políticas y Sociología · PoliSocioLAB). El tratamiento se ampara en el cumplimiento de una misión
-        realizada en interés público y la prestación de servicios académicos e investigadores (art. 6.1.e del RGPD
-        y LOPDGDD).
+        El responsable del tratamiento es la <strong>Universidad de Granada</strong> (a través de la Facultad de Ciencias Políticas y Sociología · <span translate="no">PoliSocioLAB</span>). El tratamiento se ampara en el cumplimiento de una misión realizada en interés público y la prestación de servicios académicos e investigadores (art. 6.1.e del RGPD y LOPDGDD).
       </p>
 
-      <h3>Datos que se recogen</h3>
+      <h2 id="datos">Datos que se recogen</h2>
       <p>
-        Al iniciar sesión con Google y enviar una solicitud de reserva se registran únicamente tu nombre
-        verificado en tu cuenta Google UGR, tu dirección institucional <code>@go.ugr.es</code>, el espacio y
-        horario solicitados, y el motivo o asignatura indicados.
+        Al iniciar sesión con Google y enviar una solicitud de reserva se registran únicamente tu nombre verificado en tu cuenta Google <span translate="no">UGR</span>, tu dirección institucional <code translate="no">@go.ugr.es</code>, el espacio y horario solicitados, y el motivo o asignatura indicados.
       </p>
 
-      <h3>Finalidad, acceso y proveedores técnicos</h3>
+      <h2 id="finalidad">Finalidad, acceso y proveedores técnicos</h2>
       <p>
-        Estos datos se emplean exclusivamente para gestionar la disponibilidad de los laboratorios,
-        aprobar o rechazar solicitudes por parte del personal autorizado de la Facultad y enviar los correos
-        electrónicos de confirmación o cancelación. El calendario de disponibilidad no expone datos personales
-        de otros solicitantes y la web no utiliza publicidad, cookies de seguimiento ni rastreadores comerciales.
-        Para la autenticación y el almacenamiento se emplean Google Workspace institucional (UGR) y Supabase.
+        Estos datos se emplean exclusivamente para gestionar la disponibilidad de los laboratorios, aprobar o rechazar solicitudes por parte del personal autorizado de la Facultad y enviar los correos electrónicos de confirmación o cancelación. El calendario de disponibilidad no expone datos personales de otros solicitantes y la web no utiliza publicidad, cookies de seguimiento ni rastreadores comerciales.
+      </p>
+      <p>
+        Para la autenticación institucional y el almacenamiento técnico de solicitudes se emplean <span translate="no">Google Workspace</span> (<span translate="no">UGR</span>) y <span translate="no">Supabase</span>.
       </p>
 
-      <h3>Plazo de conservación</h3>
+      <h2 id="conservacion">Plazo de conservación</h2>
       <p>
-        Los registros de reservas resueltas se conservan durante el curso académico y hasta un máximo de
-        12 meses desde la fecha de la reserva para fines de gestión y estadística interna, tras lo cual se
-        eliminan periódicamente.
+        Los registros de reservas resueltas se conservan durante el curso académico y hasta un máximo de 12 meses desde la fecha de la reserva para fines de gestión y estadística interna, tras lo cual se eliminan periódicamente.
       </p>
 
-      <h3>Derechos y contacto</h3>
+      <h2 id="derechos">Derechos y contacto</h2>
       <p>
-        Para solicitar el acceso, rectificación o supresión de tus solicitudes puedes escribir a
-        <a href="mailto:vcalero@ugr.es">vcalero@ugr.es</a>. Asimismo, puedes contactar con la Delegación de
-        Protección de Datos de la Universidad de Granada en
-        <a href="mailto:delegadapd@ugr.es">delegadapd@ugr.es</a> o presentar una reclamación ante el Consejo
-        de Transparencia y Protección de Datos de Andalucía.
+        Para solicitar el acceso, rectificación o supresión de tus solicitudes puedes escribir a <a href="mailto:vcalero@ugr.es" translate="no">vcalero@ugr.es</a>. Asimismo, puedes contactar con la Delegación de Protección de Datos de la Universidad de Granada en <a href="mailto:delegadapd@ugr.es" translate="no">delegadapd@ugr.es</a> o presentar una reclamación ante el Consejo de Transparencia y Protección de Datos de Andalucía.
       </p>
 
-      <p class="back-action">
+      <div class="read-actions">
         <a class="btn primary" href="index.html">Volver al portal de reservas</a>
-      </p>
-    </section>
+        <a class="btn" href="admin.html">Acceso personal</a>
+      </div>
+    </article>
   </main>
 
-  <footer>
-    <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
-    <span><a href="index.html">Portal de reservas</a></span>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span><strong translate="no">PoliSocioLAB</strong> · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
+      <nav class="footer-nav" aria-label="Enlaces institucionales">
+        <a href="index.html">Portal de reservas</a>
+        <a href="admin.html">Acceso personal</a>
+      </nav>
+    </div>
   </footer>
 </body>
 </html>
