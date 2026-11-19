@@ -1,6 +1,6 @@
 # PoliSocioLAB · Sistema de reservas de laboratorios (UGR)
 
-Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de Ciencias Políticas y Sociología de la Universidad de Granada**, construido con **GitHub Pages + Supabase + Brevo**.
+Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de Ciencias Políticas y Sociología de la Universidad de Granada**, construido con **GitHub Pages + Supabase + puente de correo oficial UGR (`vcalero@go.ugr.es`)**.
 
 ## Qué incluye
 
@@ -11,7 +11,7 @@ Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de C
 - **Horario configurable:** por defecto lunes a viernes de **08:00 a 21:00**, reservas de **1 a 6 horas consecutivas**.
 - **Sin login ni códigos para el alumnado:** calendario público en tiempo real y envío directo con validación estricta de correo institucional UGR (cualquier dominio terminado en `ugr.es`: `@ugr.es`, `@go.ugr.es`, `@correo.ugr.es`, etc.).
 - **Aprobación manual y protección contra dobles reservas:** panel privado (`/admin.html`) para el personal de la Facultad con restricción `EXCLUDE USING gist` en PostgreSQL (imposible aprobar dos reservas solapadas en el mismo recurso/puesto) y gestión de bloqueos por mantenimiento o eventos.
-- **Correos automáticos desde cuenta genérica del laboratorio:** enviados desde una Edge Function vía **Brevo** (300 correos/día gratis con cualquier remitente verificado, p. ej. `polisociolab@go.ugr.es` o un Gmail dedicado del laboratorio) con `Reply-To` opcional a Virginia y archivo adjunto de calendario `.ics` al aprobar.
+- **Correos automáticos oficiales desde `vcalero@go.ugr.es` (sin Brevo y sin spam):** enviados desde la Edge Function `notify-booking` a través de un puente privado mínimo en Apps Script (`supabase/mail-relay/Code.gs`) con firma SPF/DKIM oficial de Google Workspace UGR (1.500 correos/día gratis) y archivo adjunto de calendario `.ics` al aprobar.
 
 ---
 

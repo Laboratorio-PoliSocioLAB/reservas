@@ -166,6 +166,45 @@ function buildEmailContent(booking: {
   return { subject: meta.subject, html, text };
 }
 
+async function sendViaMailRelay(params: {
+  relayUrl: string;
+  relaySecret: string;
+  fromName: string;
+  replyTo?: string;
+  toEmail: string;
+  subject: string;
+  html: string;
+  text: string;
+  icsContent?: string;
+}) {
+  const res = await fetch(params.relayUrl, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      secret: params.relaySecret,
+      to: params.toEmail,
+      subject: params.subject,
+      text: params.text,
+      html: params.html,
+      name: params.fromName,
+      replyTo: params.replyTo || '',
+      ics: params.icsContent || '',
+    }),
+  });
+
+  const raw = await res.text();
+  let parsed: { ok?: boolean; error?: string } | null = null;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`Mail relay HTTP ${res.status}: respuesta no JSON (${raw.slice(0, 200)})`);
+  }
+  if (!res.ok || !parsed?.ok) {
+    throw new Error(`Mail relay error: ${parsed?.error || `HTTP ${res.status}`}`);
+  }
+}
+
 async function sendViaBrevo(params: {
   apiKey: string;
   fromEmail: string;
@@ -339,14 +378,19 @@ Deno.serve(async (req) => {
     const { subject, html, text } = buildEmailContent(fullBooking);
     const icsContent = booking.status === 'APROBADA' ? buildIcs(fullBooking) : undefined;
 
+    const relayUrl = Deno.env.get('MAIL_RELAY_URL') || '';
+    const relaySecret = Deno.env.get('MAIL_RELAY_SECRET') || '';
     const fromEmail = Deno.env.get('MAIL_FROM_EMAIL') || '';
     const fromName = Deno.env.get('MAIL_FROM_NAME') || 'PoliSocioLAB · Facultad de Ciencias Políticas y Sociología';
     const replyTo = Deno.env.get('MAIL_REPLY_TO') || 'vcalero@go.ugr.es';
     const brevoKey = Deno.env.get('BREVO_API_KEY') || '';
     const resendKey = Deno.env.get('RESEND_API_KEY') || '';
 
-    if (!fromEmail || (!brevoKey && !resendKey)) {
-      const msg = 'Falta configurar MAIL_FROM_EMAIL y BREVO_API_KEY (o RESEND_API_KEY) en Supabase Secrets.';
+    const hasRelay = Boolean(relayUrl && relaySecret);
+    const hasThirdParty = Boolean(fromEmail && (brevoKey || resendKey));
+
+    if (!hasRelay && !hasThirdParty) {
+      const msg = 'Falta configurar MAIL_RELAY_URL + MAIL_RELAY_SECRET (o proveedor SMTP/API) en Supabase Secrets.';
       await adminClient
         .from('bookings')
         .update({ mail_status: 'ERROR', mail_error: msg })
@@ -358,7 +402,19 @@ Deno.serve(async (req) => {
     }
 
     try {
-      if (brevoKey) {
+      if (hasRelay) {
+        await sendViaMailRelay({
+          relayUrl,
+          relaySecret,
+          fromName,
+          replyTo,
+          toEmail: booking.requester_email,
+          subject,
+          html,
+          text,
+          icsContent,
+        });
+      } else if (brevoKey) {
         await sendViaBrevo({
           apiKey: brevoKey,
           fromEmail,
