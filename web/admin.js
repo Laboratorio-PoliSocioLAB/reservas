@@ -1,23 +1,34 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from './vendor/supabase-js.mjs';
 import { CONFIG, isConfigured } from './config.js';
 import {
   RESOURCE_LABELS,
+  isValidGoUgrEmail,
+  getGoogleIdentityDisplayName,
   getSafeGoogleAvatarUrl,
   renderUserAvatar,
   formatDateShortEs,
   formatMadridToday,
+  initDialogLightDismissFallback,
 } from './shared.js';
 
 const $ = (id) => document.getElementById(id);
 const configured = isConfigured();
-const supabase = configured ? createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
+const supabase = configured
+  ? createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+      },
+    })
+  : null;
 
 const TARGET_LABELS = {
   ...RESOURCE_LABELS,
   CUALITATIVO2: 'Laboratorio cualitativo 2 (aforo completo)',
 };
 
-let allBookings = [];
+let pendingBookings = [];
+let historyBookings = [];
 let currentUserEmail = '';
 
 function setStatus(message, kind = 'info') {
@@ -57,12 +68,36 @@ async function sendNotification(bookingId) {
   return data;
 }
 
+function openCancelDialog(booking) {
+  const dialog = $('cancelDialog');
+  const form = $('cancelForm');
+  const reasonInput = $('cancelReason');
+  form.reset();
+  dialog.returnValue = '';
+  $('cancelMeta').textContent =
+    `${RESOURCE_LABELS[booking.resource_id] || booking.resource_id} · ${formatDateShortEs(booking.booking_date)} (${shortTime(booking.start_time)}–${shortTime(booking.end_time)}) · ${booking.requester_name}`;
+
+  return new Promise((resolve) => {
+    const onClose = () => {
+      const choice = dialog.returnValue;
+      dialog.returnValue = '';
+      if (choice === 'confirm') {
+        resolve(reasonInput.value.trim());
+      } else {
+        resolve(null);
+      }
+    };
+    dialog.addEventListener('close', onClose, { once: true });
+    dialog.showModal();
+  });
+}
+
 function renderPending() {
   const box = $('pendingList');
-  box.innerHTML = '';
-  const pending = allBookings
-    .filter((b) => b.status === 'PENDIENTE')
-    .sort((a, b) => a.booking_date.localeCompare(b.booking_date) || a.start_time.localeCompare(b.start_time));
+  box.replaceChildren();
+  const pending = [...pendingBookings].sort(
+    (a, b) => a.booking_date.localeCompare(b.booking_date) || a.start_time.localeCompare(b.start_time)
+  );
 
   $('pendingCount').textContent = String(pending.length);
 
@@ -163,10 +198,10 @@ function renderPending() {
 
 function renderHistory() {
   const box = $('historyList');
-  box.innerHTML = '';
+  box.replaceChildren();
   const filter = $('statusFilter').value;
-  const list = allBookings
-    .filter((b) => b.status !== 'PENDIENTE' && (filter === 'ALL' || b.status === filter))
+  const list = historyBookings
+    .filter((b) => filter === 'ALL' || b.status === filter)
     .sort((a, b) => b.booking_date.localeCompare(a.booking_date) || b.start_time.localeCompare(a.start_time))
     .slice(0, 150);
 
@@ -219,7 +254,7 @@ function renderHistory() {
     }
     if (b.mail_error) {
       const err = document.createElement('div');
-      err.style.color = 'var(--err-ink)';
+      err.className = 'mail-error';
       err.textContent = `Detalle del correo: ${b.mail_error}`;
       meta.appendChild(err);
     }
@@ -250,7 +285,8 @@ function renderHistory() {
       cancelBtn.className = 'danger';
       cancelBtn.textContent = 'Cancelar reserva';
       cancelBtn.addEventListener('click', async () => {
-        const reason = window.prompt('Motivo de cancelación (opcional, se incluirá en el correo):', '') ?? '';
+        const reason = await openCancelDialog(b);
+        if (reason === null) return;
         cancelBtn.disabled = true;
         try {
           const { error } = await supabase.rpc('resolve_booking', {
@@ -289,7 +325,7 @@ async function renderBlocks() {
     .order('block_date', { ascending: true })
     .order('start_time', { ascending: true });
 
-  box.innerHTML = '';
+  box.replaceChildren();
   if (error) {
     box.textContent = 'Error cargando bloqueos: ' + error.message;
     return;
@@ -335,17 +371,29 @@ async function renderBlocks() {
 }
 
 async function refreshData(statusMessage = '', statusKind = 'ok') {
-  const { data, error } = await supabase
-    .from('bookings')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(300);
+  const [pendingRes, historyRes] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('*')
+      .eq('status', 'PENDIENTE')
+      .order('booking_date', { ascending: true })
+      .order('start_time', { ascending: true }),
+    supabase
+      .from('bookings')
+      .select('*')
+      .neq('status', 'PENDIENTE')
+      .order('created_at', { ascending: false })
+      .limit(300),
+  ]);
 
-  if (error) {
-    setStatus('No se pudieron cargar las solicitudes: ' + error.message, 'error');
+  if (pendingRes.error || historyRes.error) {
+    const err = pendingRes.error || historyRes.error;
+    setStatus('No se pudieron cargar las solicitudes: ' + err.message, 'error');
     return;
   }
-  allBookings = data || [];
+
+  pendingBookings = pendingRes.data || [];
+  historyBookings = historyRes.data || [];
   renderPending();
   renderHistory();
   await renderBlocks();
@@ -362,12 +410,25 @@ async function checkSession() {
 
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user?.email) {
+    currentUserEmail = '';
     $('loginSection').hidden = false;
     $('adminPanel').hidden = true;
     return;
   }
 
-  currentUserEmail = session.user.email.toLowerCase();
+  currentUserEmail = session.user.email.trim().toLowerCase();
+  if (!isValidGoUgrEmail(currentUserEmail)) {
+    await supabase.auth.signOut();
+    currentUserEmail = '';
+    $('loginSection').hidden = false;
+    $('adminPanel').hidden = true;
+    setStatus(
+      'El acceso está restringido a cuentas institucionales de Google (@go.ugr.es) autorizadas como personal.',
+      'error'
+    );
+    return;
+  }
+
   const { data: staffRow, error } = await supabase
     .from('staff_users')
     .select('email, display_name')
@@ -386,7 +447,7 @@ async function checkSession() {
 
   $('loginSection').hidden = true;
   $('adminPanel').hidden = false;
-  const displayName = staffRow.display_name || session.user.user_metadata?.full_name || currentUserEmail;
+  const displayName = staffRow.display_name || getGoogleIdentityDisplayName(session.user) || currentUserEmail;
   $('staffName').textContent = displayName;
   $('staffAccount').textContent = currentUserEmail;
   renderUserAvatar($('staffAvatar'), $('staffAvatarFallback'), {
@@ -443,6 +504,7 @@ $('blockForm').addEventListener('submit', async (e) => {
 
 $('logoutBtn').addEventListener('click', async () => {
   await supabase.auth.signOut();
+  currentUserEmail = '';
   $('adminPanel').hidden = true;
   $('loginSection').hidden = false;
   setStatus('Sesión cerrada.', 'info');
@@ -454,9 +516,11 @@ $('tabPending').addEventListener('click', () => selectTab('pending'));
 $('tabHistory').addEventListener('click', () => selectTab('history'));
 $('tabBlocks').addEventListener('click', () => selectTab('blocks'));
 
+initDialogLightDismissFallback();
+
 if (supabase) {
   supabase.auth.onAuthStateChange((event) => {
-    if (event === 'SIGNED_IN') checkSession();
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') checkSession();
   });
 }
 

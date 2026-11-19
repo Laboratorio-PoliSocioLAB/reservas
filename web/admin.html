@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://*.googleusercontent.com; connect-src 'self' https://hccmcdqimgyylwcrcaeo.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; require-trusted-types-for 'script'">
   <title>Panel de gestión · PoliSocioLAB</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -84,8 +85,8 @@
         <div class="bar">
           <h2>Agenda e historial de reservas</h2>
           <div class="actions">
-            <label for="statusFilter" style="margin:0">Estado</label>
-            <select id="statusFilter" style="width:auto">
+            <label for="statusFilter" class="inline-label">Estado</label>
+            <select id="statusFilter" class="auto-select">
               <option value="ALL">Todos</option>
               <option value="APROBADA">Aprobadas</option>
               <option value="RECHAZADA">Rechazadas</option>
@@ -100,7 +101,7 @@
         <h2>Bloqueos de mantenimiento o eventos</h2>
         <p class="muted">Impide nuevas reservas en un laboratorio durante una franja horaria.</p>
 
-        <form id="blockForm" style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--line)">
+        <form id="blockForm" class="block-form">
           <div class="grid-2">
             <div class="field">
               <label for="blockTarget">Laboratorio</label>
@@ -140,6 +141,28 @@
     <span>PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · Universidad de Granada</span>
     <span><a href="privacidad.html">Privacidad</a> · <a href="index.html">Volver al portal de reservas</a></span>
   </footer>
+
+  <!-- Diálogo modal nativo de confirmación para cancelar reserva (sin role="dialog" ni aria-modal redundantes) -->
+  <dialog id="cancelDialog" closedby="any" aria-labelledby="cancelTitle">
+    <h2 id="cancelTitle">Cancelar reserva aprobada</h2>
+    <p id="cancelMeta" class="muted"></p>
+    <form id="cancelForm" method="dialog">
+      <div class="field">
+        <label for="cancelReason">Motivo de cancelación (opcional)</label>
+        <span id="cancelReasonHint" class="hint">Si indicas un motivo, se incluirá en el correo de aviso al solicitante.</span>
+        <textarea
+          id="cancelReason"
+          name="reason"
+          maxlength="500"
+          aria-describedby="cancelReasonHint"
+        ></textarea>
+      </div>
+      <div class="dialog-actions">
+        <button type="submit" value="keep" autofocus>Mantener reserva</button>
+        <button type="submit" value="confirm" class="danger">Confirmar cancelación</button>
+      </div>
+    </form>
+  </dialog>
 
   <script type="module" src="admin.js"></script>
 </body>

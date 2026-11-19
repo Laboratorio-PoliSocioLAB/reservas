@@ -30,19 +30,36 @@ export function isValidGoUgrEmail(value) {
   return GO_UGR_EMAIL_REGEX.test(String(value || '').trim());
 }
 
+function getGoogleIdentityData(user) {
+  const identities = Array.isArray(user?.identities) ? user.identities : [];
+  const google = identities.find((i) => i?.provider === 'google');
+  return google?.identity_data || null;
+}
+
+export function getGoogleIdentityDisplayName(user) {
+  const idData = getGoogleIdentityData(user);
+  const fromIdentity = String(idData?.full_name || idData?.name || '').trim();
+  if (fromIdentity) return fromIdentity;
+  return String(user?.user_metadata?.full_name || user?.user_metadata?.name || '').trim();
+}
+
 export function getSafeGoogleAvatarUrl(user) {
-  const raw = String(user?.user_metadata?.avatar_url || user?.user_metadata?.picture || '').trim();
+  const idData = getGoogleIdentityData(user);
+  const raw = String(
+    idData?.avatar_url ||
+      idData?.picture ||
+      user?.user_metadata?.avatar_url ||
+      user?.user_metadata?.picture ||
+      ''
+  ).trim();
   if (!raw) return '';
   try {
     const parsed = new URL(raw);
     if (parsed.protocol !== 'https:') return '';
     const host = parsed.hostname.toLowerCase();
-    const isGoogleHost =
-      host === 'googleusercontent.com' ||
-      host.endsWith('.googleusercontent.com') ||
-      host === 'google.com' ||
-      host.endsWith('.google.com');
-    return isGoogleHost ? parsed.href : '';
+    const isGoogleAvatarHost =
+      host === 'googleusercontent.com' || host.endsWith('.googleusercontent.com');
+    return isGoogleAvatarHost ? parsed.href : '';
   } catch {
     return '';
   }

@@ -1,17 +1,56 @@
 // Supabase Edge Function: notify-new-request
-// Envía un aviso por correo al personal (STAFF_NOTIFY_EMAIL, p. ej. vcalero@ugr.es)
-// cada vez que entra una nueva solicitud de reserva PENDIENTE de un usuario autenticado @go.ugr.es.
+// Envía un aviso por correo al personal (STAFF_NOTIFY_EMAIL)
+// cada vez que entra una nueva solicitud de reserva PENDIENTE de un usuario autenticado con Google (@go.ugr.es).
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.2';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const GO_UGR_EMAIL_REGEX = /^[a-z0-9][a-z0-9._+-]{0,63}@go\.ugr\.es$/i;
+const DEFAULT_ALLOWED_ORIGINS = ['https://laboratorio-polisociolab.github.io'];
+
+function getAllowedOrigins(): string[] {
+  const configured = Deno.env.get('ALLOWED_ORIGINS') || '';
+  const list = configured
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  return list.length ? list : DEFAULT_ALLOWED_ORIGINS;
+}
+
+function getCorsHeaders(req: Request): { headers: Record<string, string>; originAllowed: boolean } {
+  const origin = req.headers.get('Origin') || '';
+  const allowed = getAllowedOrigins();
+  const originAllowed = !origin || allowed.includes(origin);
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
+  if (origin && allowed.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+  return { headers, originAllowed };
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const json = new TextDecoder().decode(Uint8Array.from(atob(padded), (c) => c.charCodeAt(0)));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function hasOAuthAmr(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  const amr = payload?.amr;
+  if (!Array.isArray(amr)) return false;
+  return amr.some((entry) => typeof entry === 'object' && entry !== null && (entry as { method?: unknown }).method === 'oauth');
+}
 
 function escapeHtml(text: string): string {
   return String(text || '')
@@ -20,6 +59,10 @@ function escapeHtml(text: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+function stripHeaderControls(text: string): string {
+  return String(text || '').replace(/[\r\n\x00-\x1F\x7F]+/g, ' ').trim();
 }
 
 function formatDateEs(isoDate: string): string {
@@ -47,8 +90,9 @@ function buildStaffAlertEmail(
   const dateEs = formatDateEs(booking.booking_date);
   const start = formatTimeShort(booking.start_time);
   const end = formatTimeShort(booking.end_time);
+  const cleanLabel = stripHeaderControls(booking.resource_label);
 
-  const subject = `Nueva solicitud de reserva · ${booking.resource_label} (${dateEs} ${start}–${end})`;
+  const subject = `Nueva solicitud de reserva · ${cleanLabel} (${dateEs} ${start}–${end})`;
 
   const html = `<!doctype html>
 <html lang="es">
@@ -131,16 +175,37 @@ async function sendViaMailRelay(params: {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error(`Mail relay HTTP ${res.status}: respuesta no JSON (${raw.slice(0, 200)})`);
+    console.error('Mail relay respuesta no JSON:', res.status, raw.slice(0, 300));
+    throw new Error(`Error del servicio de correo (HTTP ${res.status}).`);
   }
   if (!res.ok || !parsed?.ok) {
-    throw new Error(`Mail relay error: ${parsed?.error || `HTTP ${res.status}`}`);
+    console.error('Mail relay devolvió error:', res.status, parsed?.error || 'sin detalle');
+    throw new Error(`El servicio de correo rechazó el envío (HTTP ${res.status}).`);
   }
 }
 
 Deno.serve(async (req) => {
+  const { headers: corsHeaders, originAllowed } = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
+    if (!originAllowed) {
+      return new Response('Forbidden', { status: 403, headers: corsHeaders });
+    }
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ ok: false, error: 'Método no permitido.' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!originAllowed) {
+    return new Response(JSON.stringify({ ok: false, error: 'Origen no autorizado.' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -148,18 +213,36 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const authHeader = req.headers.get('Authorization') ?? '';
+    const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+    const jwt = bearerMatch?.[1]?.trim() || '';
 
-    // 1. Verificar JWT de usuario autenticado @go.ugr.es
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    const userEmail = (userData?.user?.email || '').trim().toLowerCase();
-
-    if (userErr || !userEmail || !GO_UGR_EMAIL_REGEX.test(userEmail)) {
+    if (!jwt) {
       return new Response(
         JSON.stringify({ ok: false, error: 'Se requiere sesión verificada @go.ugr.es.' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 1. Verificar JWT de usuario autenticado con Google (@go.ugr.es) y correo confirmado
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${jwt}` } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    const user = userData?.user;
+    const userEmail = (user?.email || '').trim().toLowerCase();
+
+    if (userErr || !user || !user.email_confirmed_at || !GO_UGR_EMAIL_REGEX.test(userEmail) || !hasOAuthAmr(jwt)) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Se requiere sesión verificada @go.ugr.es.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: isVerified, error: verifyErr } = await userClient.rpc('is_verified_go_ugr_user');
+    if (verifyErr || isVerified !== true) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Se requiere sesión verificada @go.ugr.es.' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -181,8 +264,9 @@ Deno.serve(async (req) => {
       Deno.env.get('ADMIN_PANEL_URL') || 'https://laboratorio-polisociolab.github.io/reservas/admin.html';
 
     if (!relayUrl || !relaySecret) {
+      console.error('Falta configurar MAIL_RELAY_URL y MAIL_RELAY_SECRET en Supabase Secrets.');
       return new Response(
-        JSON.stringify({ ok: false, error: 'Falta configurar MAIL_RELAY_URL y MAIL_RELAY_SECRET.' }),
+        JSON.stringify({ ok: false, error: 'Servicio de avisos no disponible.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -190,10 +274,11 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // 2. Reclamo atómico: solo notifica una vez, solo para la solicitud PENDIENTE del propio usuario creada hace <10 min
+    const claimStamp = new Date().toISOString();
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
     const { data: booking, error: claimErr } = await adminClient
       .from('bookings')
-      .update({ staff_notified_at: new Date().toISOString() })
+      .update({ staff_notified_at: claimStamp })
       .eq('id', bookingId)
       .eq('requester_email', userEmail)
       .eq('status', 'PENDIENTE')
@@ -203,7 +288,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (claimErr) {
-      throw new Error(claimErr.message);
+      console.error('Error reclamando reserva en notify-new-request:', claimErr.message);
+      throw new Error('No se pudo preparar el aviso.');
     }
 
     if (!booking) {
@@ -222,23 +308,33 @@ Deno.serve(async (req) => {
       adminUrl
     );
 
-    await sendViaMailRelay({
-      relayUrl,
-      relaySecret,
-      fromName,
-      replyTo: booking.requester_email,
-      toEmail: staffNotifyEmail,
-      subject,
-      html,
-      text,
-    });
+    try {
+      await sendViaMailRelay({
+        relayUrl,
+        relaySecret,
+        fromName,
+        replyTo: booking.requester_email,
+        toEmail: staffNotifyEmail,
+        subject,
+        html,
+        text,
+      });
+    } catch (relayErr) {
+      // Revertir reclamo si falló el envío para no perder el aviso ante un error transitorio
+      await adminClient
+        .from('bookings')
+        .update({ staff_notified_at: null })
+        .eq('id', booking.id)
+        .eq('staff_notified_at', claimStamp);
+      throw relayErr;
+    }
 
-    return new Response(JSON.stringify({ ok: true, notified: staffNotifyEmail }), {
+    return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ ok: false, error: message }), {
+    console.error('Error en notify-new-request:', err);
+    return new Response(JSON.stringify({ ok: false, error: 'No se pudo enviar el aviso al personal.' }), {
       status: 502,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

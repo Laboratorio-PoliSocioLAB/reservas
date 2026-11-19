@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https://*.googleusercontent.com; connect-src 'self' https://hccmcdqimgyylwcrcaeo.supabase.co; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; require-trusted-types-for 'script'">
   <title>PoliSocioLAB · Reservas de laboratorios</title>
   <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
   <link rel="stylesheet" href="styles.css">
@@ -124,7 +125,7 @@
             <button id="prev" type="button" aria-label="Semana anterior">←</button>
             <button id="today" type="button">Hoy</button>
             <button id="next" type="button" aria-label="Semana siguiente">→</button>
-            <label for="date" style="margin:0">Ir a fecha</label>
+            <label for="date" class="inline-label">Ir a fecha</label>
             <input type="date" id="date" required>
           </div>
           <div id="week" class="week" aria-label="Días de la semana"></div>

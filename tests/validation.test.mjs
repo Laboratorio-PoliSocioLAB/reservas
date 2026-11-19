@@ -5,12 +5,15 @@ import path from 'node:path';
 import {
   isValidUgrEmail,
   isValidGoUgrEmail,
+  getGoogleIdentityDisplayName,
   getSafeGoogleAvatarUrl,
   computeConsecutiveHours,
   addDays,
   mondayOf,
   formatDateShortEs,
 } from '../web/shared.js';
+
+const root = path.resolve(import.meta.dirname, '..');
 
 test('valida correos institucionales terminados en ugr.es y rechaza otros dominios', () => {
   const valid = [
@@ -87,7 +90,6 @@ test('utilidades de fechas y semanas ISO', () => {
 });
 
 test('migración SQL y Edge Function existen y contienen restricciones críticas', () => {
-  const root = path.resolve(import.meta.dirname, '..');
   const sql = fs.readFileSync(path.join(root, 'supabase/migrations/001_initial_schema.sql'), 'utf8');
   assert.match(sql, /bookings_no_approved_overlap/);
   assert.match(sql, /exclude using gist/i);
@@ -100,6 +102,15 @@ test('migración SQL y Edge Function existen y contienen restricciones críticas
   assert.match(fn, /BEGIN:VCALENDAR/);
   assert.match(fn, /api\.brevo\.com/);
   assert.match(fn, /staff_users/);
+  assert.match(fn, /escapeIcsText/);
+  assert.match(fn, /hasOAuthAmr/);
+  assert.doesNotMatch(fn, /'Access-Control-Allow-Origin': '\*'/);
+
+  const fnAlert = fs.readFileSync(path.join(root, 'supabase/functions/notify-new-request/index.ts'), 'utf8');
+  assert.match(fnAlert, /hasOAuthAmr/);
+  assert.match(fnAlert, /is_verified_go_ugr_user/);
+  assert.doesNotMatch(fnAlert, /'Access-Control-Allow-Origin': '\*'/);
+  assert.doesNotMatch(fnAlert, /notified:\s*staffNotifyEmail/);
 
   const sqlAuth = fs.readFileSync(
     path.join(root, 'supabase/migrations/003_require_go_ugr_google_auth.sql'),
@@ -118,6 +129,57 @@ test('migración SQL y Edge Function existen y contienen restricciones críticas
   assert.match(sqlPool, /p_resource_id = 'CUALITATIVO2'/);
 });
 
+test('migración 007 endurece auth Google OAuth, RLS, anti-TOCTOU e identidad inmutable', () => {
+  const sqlHardening = fs.readFileSync(
+    path.join(root, 'supabase/migrations/007_security_hardening.sql'),
+    'utf8'
+  );
+  assert.match(sqlHardening, /entry ->> 'method' = 'oauth'/);
+  assert.match(sqlHardening, /from auth\.identities i/i);
+  assert.match(sqlHardening, /revoke all on function public\.has_resource_conflict/i);
+  assert.match(sqlHardening, /revoke all on function public\.range_within_opening_hours/i);
+  assert.match(sqlHardening, /revoke all on function public\.is_staff\(\) from public, anon/i);
+  assert.match(sqlHardening, /drop policy if exists "bookings_staff_update" on public\.bookings/i);
+  assert.match(sqlHardening, /pg_advisory_xact_lock/);
+  assert.match(sqlHardening, /create or replace function public\.is_admin\(\)/i);
+  assert.doesNotMatch(sqlHardening, /auth\.jwt\(\)\s*->\s*'user_metadata'/);
+});
+
+test('frontend evita CDNs externos, inline styles, innerHTML y window.prompt', () => {
+  const appJs = fs.readFileSync(path.join(root, 'web/app.js'), 'utf8');
+  const adminJs = fs.readFileSync(path.join(root, 'web/admin.js'), 'utf8');
+  const indexHtml = fs.readFileSync(path.join(root, 'web/index.html'), 'utf8');
+  const adminHtml = fs.readFileSync(path.join(root, 'web/admin.html'), 'utf8');
+  const privHtml = fs.readFileSync(path.join(root, 'web/privacidad.html'), 'utf8');
+
+  assert.ok(fs.existsSync(path.join(root, 'web/vendor/supabase-js.mjs')));
+  for (const js of [appJs, adminJs]) {
+    assert.match(js, /from '\.\/vendor\/supabase-js\.mjs'/);
+    assert.match(js, /flowType:\s*'pkce'/);
+    assert.doesNotMatch(js, /https:\/\/esm\.sh/);
+    assert.doesNotMatch(js, /\.innerHTML\s*=/);
+    assert.doesNotMatch(js, /window\.prompt/);
+  }
+
+  for (const html of [indexHtml, adminHtml, privHtml]) {
+    assert.match(html, /http-equiv="Content-Security-Policy"/);
+    assert.doesNotMatch(html, /\sstyle="/);
+    assert.doesNotMatch(html, /frame-ancestors/); // ignorada en <meta>
+  }
+
+  assert.match(adminHtml, /<dialog id="cancelDialog"/);
+  const adminHtmlNoComments = adminHtml.replace(/<!--[\s\S]*?-->/g, '');
+  assert.doesNotMatch(adminHtmlNoComments, /role="dialog"|aria-modal/);
+});
+
+test('Code.gs aplica comparación en tiempo constante, lista blanca de asuntos y rate limit', () => {
+  const gs = fs.readFileSync(path.join(root, 'supabase/mail-relay/Code.gs'), 'utf8');
+  assert.match(gs, /function timingSafeEqual_/);
+  assert.match(gs, /ALLOWED_SUBJECT_PREFIXES_/);
+  assert.match(gs, /checkRateLimit_/);
+  assert.doesNotMatch(gs, /PoliSocioLAB Mail Relay/);
+});
+
 test('valida correos exclusivos @go.ugr.es para acceso autenticado', () => {
   assert.equal(isValidGoUgrEmail('estudiante@go.ugr.es'), true);
   assert.equal(isValidGoUgrEmail('VCALERO@GO.UGR.ES'), true);
@@ -127,12 +189,43 @@ test('valida correos exclusivos @go.ugr.es para acceso autenticado', () => {
   assert.equal(isValidGoUgrEmail('falso@sub.go.ugr.es'), false);
 });
 
-test('filtra de forma segura la URL de avatar de Google', () => {
+test('filtra de forma segura la URL de avatar de Google y prioriza identity_data', () => {
   assert.equal(
     getSafeGoogleAvatarUrl({
       user_metadata: { avatar_url: 'https://lh3.googleusercontent.com/a/ACg8ocTest=s96-c' },
     }),
     'https://lh3.googleusercontent.com/a/ACg8ocTest=s96-c'
+  );
+  assert.equal(
+    getSafeGoogleAvatarUrl({
+      identities: [
+        {
+          provider: 'google',
+          identity_data: {
+            full_name: 'Nombre Real Google',
+            picture: 'https://lh3.googleusercontent.com/a/RealPic',
+          },
+        },
+      ],
+      user_metadata: {
+        full_name: 'Nombre Editado',
+        avatar_url: 'https://lh3.googleusercontent.com/a/FakePic',
+      },
+    }),
+    'https://lh3.googleusercontent.com/a/RealPic'
+  );
+  assert.equal(
+    getGoogleIdentityDisplayName({
+      identities: [{ provider: 'google', identity_data: { full_name: 'Nombre Real Google' } }],
+      user_metadata: { full_name: 'Nombre Editado' },
+    }),
+    'Nombre Real Google'
+  );
+  assert.equal(
+    getSafeGoogleAvatarUrl({
+      user_metadata: { picture: 'https://www.google.com/redirect?url=https://evil.example' },
+    }),
+    ''
   );
   assert.equal(
     getSafeGoogleAvatarUrl({

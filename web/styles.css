@@ -692,6 +692,28 @@ dialog::backdrop {
   font-size: 0.94rem;
 }
 
+.inline-label {
+  margin: 0;
+}
+
+.auto-select {
+  width: auto;
+}
+
+.block-form {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.back-action {
+  margin-top: 1.25rem;
+}
+
+.mail-error {
+  color: var(--err-ink);
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

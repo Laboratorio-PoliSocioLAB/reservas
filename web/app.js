@@ -1,9 +1,10 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from './vendor/supabase-js.mjs';
 import { CONFIG, isConfigured } from './config.js';
 import {
   ROOM_NAMES,
   RESOURCE_LABELS,
   isValidGoUgrEmail,
+  getGoogleIdentityDisplayName,
   getSafeGoogleAvatarUrl,
   renderUserAvatar,
   addDays,
@@ -19,7 +20,14 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const demoMode = !isConfigured();
-const supabase = demoMode ? null : createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+const supabase = demoMode
+  ? null
+  : createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+      },
+    });
 
 const SPACE_META = {
   RADIO: {
@@ -150,7 +158,7 @@ function showAppForUser(email, fullName = '', avatarUrl = '') {
 
 function renderWeek() {
   const wrap = $('week');
-  wrap.innerHTML = '';
+  wrap.replaceChildren();
   if (!state.date) return;
 
   const first = mondayOf(state.date);
@@ -182,7 +190,7 @@ function renderWeek() {
 
 function renderSelectedRoomSlots() {
   const box = $('spaceSlots');
-  box.innerHTML = '';
+  box.replaceChildren();
   const roomKey = state.selectedRoom;
   if (!roomKey) return;
 
@@ -319,7 +327,7 @@ function updateDurationSelect() {
 
   const opts = computeConsecutiveHours(state.slots, slot.room, slot.start, state.selectedResource, 6);
   const select = $('duration');
-  select.innerHTML = '';
+  select.replaceChildren();
 
   const list = opts.length
     ? opts
@@ -409,8 +417,7 @@ async function syncAuthSession(session) {
     return;
   }
 
-  const meta = session.user.user_metadata || {};
-  const fullName = String(meta.full_name || meta.name || '').trim();
+  const fullName = getGoogleIdentityDisplayName(session.user);
   const avatarUrl = getSafeGoogleAvatarUrl(session.user);
   const sameUser = state.userEmail === email && !$('appContent').hidden;
 

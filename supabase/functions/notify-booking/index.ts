@@ -1,14 +1,56 @@
 // Supabase Edge Function: notify-booking
-// Envía correos automáticos de aprobación, rechazo o cancelación desde la cuenta genérica de PoliSocioLAB
-// Soporta Brevo (recomendado, 300/día gratis con cualquier remitente verificado) o Resend.
+// Envía correos automáticos de aprobación, rechazo o cancelación desde la cuenta institucional de PoliSocioLAB
+// Soporta puente Mail Relay (Apps Script), Brevo o Resend.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DEFAULT_ALLOWED_ORIGINS = ['https://laboratorio-polisociolab.github.io'];
+const RESEND_COOLDOWN_MS = 30_000;
+
+function getAllowedOrigins(): string[] {
+  const configured = Deno.env.get('ALLOWED_ORIGINS') || '';
+  const list = configured
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  return list.length ? list : DEFAULT_ALLOWED_ORIGINS;
+}
+
+function getCorsHeaders(req: Request): { headers: Record<string, string>; originAllowed: boolean } {
+  const origin = req.headers.get('Origin') || '';
+  const allowed = getAllowedOrigins();
+  const originAllowed = !origin || allowed.includes(origin);
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
+  if (origin && allowed.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+  return { headers, originAllowed };
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const json = new TextDecoder().decode(Uint8Array.from(atob(padded), (c) => c.charCodeAt(0)));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function hasOAuthAmr(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  const amr = payload?.amr;
+  if (!Array.isArray(amr)) return false;
+  return amr.some((entry) => typeof entry === 'object' && entry !== null && (entry as { method?: unknown }).method === 'oauth');
+}
 
 function escapeHtml(text: string): string {
   return String(text || '')
@@ -17,6 +59,21 @@ function escapeHtml(text: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+// Escape RFC 5545 (§3.3.11) para valores TEXT en archivos .ics (evita inyección CRLF/propiedades)
+function escapeIcsText(text: string): string {
+  return String(text || '')
+    .replace(/\r\n|\r/g, '\n')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replaceAll('\\', '\\\\')
+    .replaceAll(';', '\\;')
+    .replaceAll(',', '\\,')
+    .replaceAll('\n', '\\n');
+}
+
+function stripHeaderControls(text: string): string {
+  return String(text || '').replace(/[\r\n\x00-\x1F\x7F]+/g, ' ').trim();
 }
 
 function formatDateEs(isoDate: string): string {
@@ -40,10 +97,14 @@ function buildIcs(booking: {
   const startHm = formatTimeShort(booking.start_time).replace(':', '') + '00';
   const endHm = formatTimeShort(booking.end_time).replace(':', '') + '00';
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+  const safeId = escapeIcsText(booking.id);
+  const safeLabel = escapeIcsText(booking.resource_label);
+  const safePurpose = booking.purpose ? escapeIcsText(booking.purpose) : '';
+
   const desc = [
-    `Reserva aprobada en PoliSocioLAB (${booking.resource_label}).`,
-    booking.purpose ? `Actividad: ${booking.purpose}` : '',
-    `Referencia: ${booking.id}`,
+    `Reserva aprobada en PoliSocioLAB (${safeLabel}).`,
+    safePurpose ? `Actividad: ${safePurpose}` : '',
+    `Referencia: ${safeId}`,
   ]
     .filter(Boolean)
     .join('\\n');
@@ -55,12 +116,12 @@ function buildIcs(booking: {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:${booking.id}@polisociolab.ugr.es`,
+    `UID:${safeId}@polisociolab.ugr.es`,
     `DTSTAMP:${stamp}`,
     `DTSTART;TZID=Europe/Madrid:${ymd}T${startHm}`,
     `DTEND;TZID=Europe/Madrid:${ymd}T${endHm}`,
-    `SUMMARY:PoliSocioLAB · ${booking.resource_label}`,
-    `LOCATION:Facultad de Ciencias Políticas y Sociología, Universidad de Granada`,
+    `SUMMARY:PoliSocioLAB · ${safeLabel}`,
+    'LOCATION:Facultad de Ciencias Políticas y Sociología\\, Universidad de Granada',
     `DESCRIPTION:${desc}`,
     'END:VEVENT',
     'END:VCALENDAR',
@@ -88,24 +149,25 @@ function buildEmailContent(booking: {
   const dateEs = formatDateEs(booking.booking_date);
   const start = formatTimeShort(booking.start_time);
   const end = formatTimeShort(booking.end_time);
+  const cleanLabel = stripHeaderControls(booking.resource_label);
 
   const metaByStatus: Record<string, { subject: string; heading: string; lead: string; badgeBg: string; badgeColor: string }> = {
     APROBADA: {
-      subject: `Reserva aprobada · ${booking.resource_label} (${dateEs} ${start}–${end})`,
+      subject: `Reserva aprobada · ${cleanLabel} (${dateEs} ${start}–${end})`,
       heading: 'Tu reserva ha sido aprobada',
       lead: '',
       badgeBg: '#e4f3ea',
       badgeColor: '#1b5e36',
     },
     RECHAZADA: {
-      subject: `Solicitud rechazada · ${booking.resource_label} (${dateEs} ${start}–${end})`,
+      subject: `Solicitud rechazada · ${cleanLabel} (${dateEs} ${start}–${end})`,
       heading: 'Tu solicitud no ha podido ser aprobada',
       lead: 'Se ha rechazado la solicitud.',
       badgeBg: '#fcebe8',
       badgeColor: '#8c281f',
     },
     CANCELADA: {
-      subject: `Reserva cancelada · ${booking.resource_label} (${dateEs} ${start}–${end})`,
+      subject: `Reserva cancelada · ${cleanLabel} (${dateEs} ${start}–${end})`,
       heading: 'Tu reserva ha sido cancelada',
       lead: 'La reserva previamente aprobada ha sido cancelada por el personal de la Facultad.',
       badgeBg: '#f4ece7',
@@ -197,10 +259,12 @@ async function sendViaMailRelay(params: {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error(`Mail relay HTTP ${res.status}: respuesta no JSON (${raw.slice(0, 200)})`);
+    console.error('Mail relay respuesta no JSON:', res.status, raw.slice(0, 300));
+    throw new Error(`Error del servicio de correo (HTTP ${res.status}).`);
   }
   if (!res.ok || !parsed?.ok) {
-    throw new Error(`Mail relay error: ${parsed?.error || `HTTP ${res.status}`}`);
+    console.error('Mail relay devolvió error:', res.status, parsed?.error || 'sin detalle');
+    throw new Error(`El servicio de correo rechazó el envío (HTTP ${res.status}).`);
   }
 }
 
@@ -247,7 +311,8 @@ async function sendViaBrevo(params: {
 
   if (!res.ok) {
     const errBody = await res.text();
-    throw new Error(`Brevo HTTP ${res.status}: ${errBody.slice(0, 300)}`);
+    console.error('Brevo error:', res.status, errBody.slice(0, 300));
+    throw new Error(`Error en el proveedor de correo Brevo (HTTP ${res.status}).`);
   }
 }
 
@@ -292,13 +357,33 @@ async function sendViaResend(params: {
 
   if (!res.ok) {
     const errBody = await res.text();
-    throw new Error(`Resend HTTP ${res.status}: ${errBody.slice(0, 300)}`);
+    console.error('Resend error:', res.status, errBody.slice(0, 300));
+    throw new Error(`Error en el proveedor de correo Resend (HTTP ${res.status}).`);
   }
 }
 
 Deno.serve(async (req) => {
+  const { headers: corsHeaders, originAllowed } = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
+    if (!originAllowed) {
+      return new Response('Forbidden', { status: 403, headers: corsHeaders });
+    }
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Método no permitido.' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!originAllowed) {
+    return new Response(JSON.stringify({ error: 'Origen no autorizado.' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -306,26 +391,45 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const authHeader = req.headers.get('Authorization') ?? '';
+    const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+    const jwt = bearerMatch?.[1]?.trim() || '';
 
-    // 1. Verificar JWT del usuario autenticado
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData?.user?.email) {
+    if (!jwt) {
       return new Response(JSON.stringify({ error: 'Sesión de personal no válida.' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    // 1. Verificar JWT de usuario activo, correo confirmado y sesión OAuth (Google)
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${jwt}` } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    const user = userData?.user;
+
+    if (userErr || !user?.email || !user.email_confirmed_at || !hasOAuthAmr(jwt)) {
+      return new Response(JSON.stringify({ error: 'Sesión de personal no válida.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: isStaffRpc, error: staffRpcErr } = await userClient.rpc('is_staff');
+    if (staffRpcErr || isStaffRpc !== true) {
+      return new Response(JSON.stringify({ error: 'Acceso reservado al personal autorizado.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // 2. Comprobar que el correo está autorizado en staff_users
+    // 2. Doble comprobación en staff_users
     const { data: staffRow } = await adminClient
       .from('staff_users')
       .select('email')
-      .eq('email', userData.user.email.toLowerCase())
+      .eq('email', user.email.toLowerCase())
       .maybeSingle();
 
     if (!staffRow) {
@@ -335,9 +439,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { bookingId } = await req.json();
-    if (!bookingId) {
-      return new Response(JSON.stringify({ error: 'Falta bookingId.' }), {
+    const body = await req.json().catch(() => ({}));
+    const bookingId = typeof body?.bookingId === 'string' ? body.bookingId.trim() : '';
+    if (!UUID_REGEX.test(bookingId)) {
+      return new Response(JSON.stringify({ error: 'bookingId no válido.' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -346,7 +451,7 @@ Deno.serve(async (req) => {
     // 3. Obtener datos de la reserva y su recurso
     const { data: booking, error: fetchErr } = await adminClient
       .from('bookings')
-      .select('id, requester_name, requester_email, purpose, resource_id, booking_date, start_time, end_time, status, review_note, resources(label)')
+      .select('id, requester_name, requester_email, purpose, resource_id, booking_date, start_time, end_time, status, review_note, mail_status, mail_sent_at, resources(label)')
       .eq('id', bookingId)
       .single();
 
@@ -360,6 +465,17 @@ Deno.serve(async (req) => {
     if (!['APROBADA', 'RECHAZADA', 'CANCELADA'].includes(booking.status)) {
       return new Response(JSON.stringify({ error: 'La reserva todavía está pendiente.' }), {
         status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Evitar envíos duplicados accidentales por doble clic (30 s de margen si ya figura como ENVIADO)
+    if (
+      booking.mail_status === 'ENVIADO' &&
+      booking.mail_sent_at &&
+      Date.now() - Date.parse(booking.mail_sent_at) < RESEND_COOLDOWN_MS
+    ) {
+      return new Response(JSON.stringify({ ok: true, skipped: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -389,7 +505,8 @@ Deno.serve(async (req) => {
     const hasThirdParty = Boolean(fromEmail && (brevoKey || resendKey));
 
     if (!hasRelay && !hasThirdParty) {
-      const msg = 'Falta configurar MAIL_RELAY_URL + MAIL_RELAY_SECRET (o proveedor SMTP/API) en Supabase Secrets.';
+      console.error('Faltan credenciales de envío de correo en Supabase Secrets.');
+      const msg = 'Servicio de correo no configurado.';
       await adminClient
         .from('bookings')
         .update({ mail_status: 'ERROR', mail_error: msg })
@@ -453,10 +570,10 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (sendErr) {
-      const errMsg = sendErr instanceof Error ? sendErr.message : String(sendErr);
+      const errMsg = sendErr instanceof Error ? sendErr.message : 'Error al enviar el correo.';
       await adminClient
         .from('bookings')
-        .update({ mail_status: 'ERROR', mail_error: errMsg.slice(0, 500) })
+        .update({ mail_status: 'ERROR', mail_error: errMsg.slice(0, 200) })
         .eq('id', booking.id);
       return new Response(JSON.stringify({ ok: false, error: errMsg }), {
         status: 502,
@@ -464,8 +581,8 @@ Deno.serve(async (req) => {
       });
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: message }), {
+    console.error('Error inesperado en notify-booking:', err);
+    return new Response(JSON.stringify({ error: 'Error interno al procesar la notificación.' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
