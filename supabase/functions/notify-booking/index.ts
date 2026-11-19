@@ -134,7 +134,7 @@ function buildEmailContent(booking: {
       <table style="width:100%;border-collapse:collapse;background:#faf7f4;border:1px solid #e5d9d0;border-radius:6px">
         <tr><td style="padding:8px 12px;color:#64524a;width:120px">Espacio</td><td style="padding:8px 12px;font-weight:600">${escapeHtml(booking.resource_label)}</td></tr>
         <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Fecha</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(dateEs)}</td></tr>
-        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Horario</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(start)} – ${escapeHtml(end)} (hora de Granada)</td></tr>
+        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Horario</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(start)} – ${escapeHtml(end)}</td></tr>
         ${booking.purpose ? `<tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Actividad</td><td style="padding:8px 12px;border-top:1px solid #eee5de">${escapeHtml(booking.purpose)}</td></tr>` : ''}
         <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Referencia</td><td style="padding:8px 12px;font-family:monospace;font-size:12px;border-top:1px solid #eee5de">${escapeHtml(booking.id)}</td></tr>
       </table>
@@ -153,7 +153,7 @@ function buildEmailContent(booking: {
     '',
     `Espacio: ${booking.resource_label}`,
     `Fecha: ${dateEs}`,
-    `Horario: ${start}–${end} (hora de Granada)`,
+    `Horario: ${start}–${end}`,
     booking.purpose ? `Actividad: ${booking.purpose}` : '',
     booking.review_note ? `Nota de la Facultad: ${booking.review_note}` : '',
     `Referencia: ${booking.id}`,
