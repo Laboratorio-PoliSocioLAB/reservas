@@ -52,29 +52,29 @@ function buildStaffAlertEmail(
 
   const html = `<!doctype html>
 <html lang="es">
-<body style="margin:0;padding:24px;background:#f9f4ef;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#2b221f">
-  <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e5d9d0;border-radius:10px;overflow:hidden">
-    <div style="background:#34231d;color:#ffffff;padding:20px 24px;border-bottom:4px solid #f37020">
-      <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em">PoliSocioLAB</div>
-      <div style="font-size:13px;color:#ffe0cc;margin-top:2px">Facultad de Ciencias Políticas y Sociología · Universidad de Granada</div>
+<body style="margin:0;padding:24px;background:#f8fafc;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#0f172a">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-top:5px solid #f37020;border-radius:10px;overflow:hidden">
+    <div style="background:#ffffff;color:#0f172a;padding:20px 24px;border-bottom:1px solid #e2e8f0">
+      <div style="font-size:21px;font-weight:700;letter-spacing:-0.02em;color:#d95708">PoliSocioLAB</div>
+      <div style="font-size:13px;color:#475569;margin-top:2px">Facultad de Ciencias Políticas y Sociología · Universidad de Granada</div>
     </div>
     <div style="padding:24px">
-      <span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#fff0e3;color:#a84308">PENDIENTE DE REVISIÓN</span>
-      <h1 style="font-size:20px;margin:12px 0 8px">Nueva solicitud de reserva</h1>
+      <span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ffedd5;color:#9a3412">PENDIENTE DE REVISIÓN</span>
+      <h1 style="font-size:20px;margin:12px 0 8px;color:#0f172a">Nueva solicitud de reserva</h1>
       <p style="margin:0 0 16px;line-height:1.5">Se ha registrado una nueva petición de uso de laboratorio pendiente de aprobación.</p>
-      <table style="width:100%;border-collapse:collapse;background:#faf7f4;border:1px solid #e5d9d0;border-radius:6px">
-        <tr><td style="padding:8px 12px;color:#64524a;width:120px">Solicitante</td><td style="padding:8px 12px;font-weight:600">${escapeHtml(booking.requester_name)}</td></tr>
-        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Correo</td><td style="padding:8px 12px;border-top:1px solid #eee5de"><a href="mailto:${escapeHtml(booking.requester_email)}" style="color:#c4510e">${escapeHtml(booking.requester_email)}</a></td></tr>
-        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Espacio</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(booking.resource_label)}</td></tr>
-        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Fecha</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(dateEs)}</td></tr>
-        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Horario</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(start)} – ${escapeHtml(end)}</td></tr>
-        ${booking.purpose ? `<tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Actividad</td><td style="padding:8px 12px;border-top:1px solid #eee5de">${escapeHtml(booking.purpose)}</td></tr>` : ''}
-        <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Referencia</td><td style="padding:8px 12px;font-family:monospace;font-size:12px;border-top:1px solid #eee5de">${escapeHtml(booking.id)}</td></tr>
+      <table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">
+        <tr><td style="padding:8px 12px;color:#475569;width:120px">Solicitante</td><td style="padding:8px 12px;font-weight:600">${escapeHtml(booking.requester_name)}</td></tr>
+        <tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Correo</td><td style="padding:8px 12px;border-top:1px solid #e2e8f0"><a href="mailto:${escapeHtml(booking.requester_email)}" style="color:#c84f08">${escapeHtml(booking.requester_email)}</a></td></tr>
+        <tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Espacio</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #e2e8f0">${escapeHtml(booking.resource_label)}</td></tr>
+        <tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Fecha</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #e2e8f0">${escapeHtml(dateEs)}</td></tr>
+        <tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Horario</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #e2e8f0">${escapeHtml(start)} – ${escapeHtml(end)}</td></tr>
+        ${booking.purpose ? `<tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Actividad</td><td style="padding:8px 12px;border-top:1px solid #e2e8f0">${escapeHtml(booking.purpose)}</td></tr>` : ''}
+        <tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Referencia</td><td style="padding:8px 12px;font-family:monospace;font-size:12px;border-top:1px solid #e2e8f0">${escapeHtml(booking.id)}</td></tr>
       </table>
       <p style="margin:20px 0 0">
-        <a href="${escapeHtml(adminUrl)}" style="display:inline-block;padding:11px 18px;background:#f37020;color:#ffffff;text-decoration:none;font-weight:700;border-radius:6px">Revisar en el panel de gestión</a>
+        <a href="${escapeHtml(adminUrl)}" style="display:inline-block;padding:11px 18px;background:#c84f08;color:#ffffff;text-decoration:none;font-weight:700;border-radius:6px">Revisar en el panel de gestión</a>
       </p>
-      <p style="margin:18px 0 0;font-size:12px;color:#64524a">Si necesitas contactar con quien solicita la reserva antes de resolverla, puedes responder directamente a este correo.</p>
+      <p style="margin:18px 0 0;font-size:12px;color:#475569">Si necesitas contactar con quien solicita la reserva antes de resolverla, puedes responder directamente a este correo.</p>
     </div>
   </div>
 </body>

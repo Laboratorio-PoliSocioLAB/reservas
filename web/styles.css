@@ -1,22 +1,29 @@
 :root {
   color-scheme: light;
-  --ink: #2b221f;
-  --muted: #64524a;
-  --accent: #a5410e;
-  --accent-hover: #83340d;
+  --ink: #0f172a;
+  --muted: #475569;
   --orange: #f37020;
-  --header-bg: #34231d;
-  --line: #e5d9d0;
-  --input-border: #ac9588;
+  --orange-heading: #d95708;
+  --accent: #c84f08;
+  --accent-hover: #a64006;
+  --orange-50: #fff7f2;
+  --orange-100: #ffedd5;
+  --orange-200: #fdba74;
+  --orange-900: #9a3412;
+  --line: #e2e8f0;
+  --input-border: #64748b;
   --paper: #ffffff;
-  --background: #f9f4ef;
-  --ok-bg: #e4f3ea;
-  --ok-ink: #1b5e36;
-  --warn-bg: #fdf1da;
-  --warn-ink: #724906;
-  --err-bg: #fcebe8;
-  --err-ink: #8c281f;
-  --err-border: #c93b2b;
+  --surface-subtle: #f8fafc;
+  --background: #f8fafc;
+  --ok-bg: #ecfdf5;
+  --ok-ink: #047857;
+  --warn-bg: #fffbeb;
+  --warn-ink: #92400e;
+  --err-bg: #fef2f2;
+  --err-ink: #b91c1c;
+  --err-border: #dc2626;
+  --info-bg: #f1f5f9;
+  --info-ink: #334155;
 }
 
 * {
@@ -31,15 +38,17 @@ body {
 }
 
 header {
-  background: var(--header-bg);
-  color: #ffffff;
-  border-bottom: 5px solid var(--orange);
+  background: var(--paper);
+  color: var(--ink);
+  border-top: 6px solid var(--orange);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.05);
 }
 
 .masthead {
   max-width: 68rem;
   margin: 0 auto;
-  padding: 1.85rem 1rem;
+  padding: 1.55rem 1rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -48,24 +57,22 @@ header {
 }
 
 .masthead p {
-  margin: 0.2rem 0 0;
-  color: #ffe0cc;
+  margin: 0.25rem 0 0;
+  color: var(--muted);
 }
 
 .faculty-logo {
   display: block;
-  width: clamp(12rem, 32vw, 15.5rem);
+  width: clamp(12.5rem, 32vw, 16rem);
   height: auto;
-  padding: 0.55rem 0.7rem;
-  background: #ffffff;
-  border-radius: 0.45rem;
 }
 
 h1 {
-  font-size: clamp(1.85rem, 4.8vw, 3rem);
+  font-size: clamp(1.85rem, 4.8vw, 2.9rem);
   letter-spacing: -0.035em;
   line-height: 1.08;
   margin: 0;
+  color: var(--orange-heading);
 }
 
 h2 {
@@ -84,14 +91,18 @@ p {
 }
 
 a {
-  color: #84350e;
+  color: var(--accent);
   text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--accent-hover);
 }
 
 main {
   max-width: 68rem;
   margin: 0 auto;
-  padding: 1.25rem 1rem 3rem;
+  padding: 1.35rem 1rem 3rem;
 }
 
 section {
@@ -100,10 +111,11 @@ section {
   border-radius: 0.85rem;
   padding: clamp(1rem, 3vw, 1.5rem);
   margin: 0 0 1rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
 }
 
 .demo-banner {
-  border: 1px solid #e7c488;
+  border: 1px solid #fcd34d;
   background: var(--warn-bg);
   color: var(--warn-ink);
   border-radius: 0.55rem;
@@ -115,6 +127,7 @@ section {
 .notice {
   padding: 0.8rem 1rem;
   border-radius: 0.55rem;
+  border: 1px solid #a7f3d0;
   background: var(--ok-bg);
   color: var(--ok-ink);
   margin: 0 0 1rem;
@@ -122,13 +135,15 @@ section {
 }
 
 .notice[data-kind="error"] {
+  border-color: #fecaca;
   background: var(--err-bg);
   color: var(--err-ink);
 }
 
 .notice[data-kind="info"] {
-  background: #f2ebe5;
-  color: var(--ink);
+  border-color: var(--line);
+  background: var(--info-bg);
+  color: var(--info-ink);
 }
 
 .bar,
@@ -166,9 +181,9 @@ section {
 }
 
 .week [aria-current="date"] {
-  background: #fce5d5;
-  border-color: var(--accent);
-  color: #6b2606;
+  background: var(--orange-100);
+  border-color: var(--orange);
+  color: var(--orange-900);
 }
 
 /* Menú de selección de espacios con tarjetas subgrid y fotos */
@@ -196,6 +211,7 @@ section {
   border-radius: 0.85rem;
   overflow: hidden;
   padding-bottom: 1.1rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.05);
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
@@ -205,7 +221,7 @@ section {
   aspect-ratio: 16 / 10;
   object-fit: cover;
   display: block;
-  background: var(--header-bg);
+  background: var(--orange-50);
 }
 
 .space-card > h3,
@@ -244,8 +260,8 @@ section {
 }
 
 .space-card:has(.card-action:hover) {
-  border-color: var(--accent);
-  box-shadow: 0 10px 24px rgb(52 35 29 / 0.12);
+  border-color: var(--orange);
+  box-shadow: 0 12px 26px rgb(243 112 32 / 0.16);
   transform: translateY(-2px);
 }
 
@@ -305,7 +321,8 @@ section {
   object-fit: cover;
   border-radius: 0.6rem;
   display: block;
-  background: var(--header-bg);
+  background: var(--orange-50);
+  border: 1px solid var(--line);
 }
 
 .space-detail-header h2 {
@@ -326,7 +343,7 @@ section {
   border: 1px solid var(--line);
   border-radius: 0.6rem;
   padding: 0.75rem 0.9rem;
-  background: #fffdfb;
+  background: var(--surface-subtle);
 }
 
 ::view-transition-old(selected-space-photo),
@@ -401,7 +418,7 @@ small {
 
 .pill[data-state="CANCELADA"],
 .pill.full {
-  background: #f0e8e2;
+  background: var(--info-bg);
   color: var(--muted);
 }
 
@@ -439,13 +456,13 @@ button,
   color: inherit;
   min-height: 3rem;
   border: 1px solid var(--input-border);
-  border-radius: 0.45rem;
+  border-radius: 0.5rem;
   background: #ffffff;
-  padding: 0.45rem 0.78rem;
+  padding: 0.45rem 0.82rem;
 }
 
 input[readonly] {
-  background: #f5f0eb;
+  background: var(--info-bg);
   color: var(--muted);
   border-color: var(--line);
 }
@@ -454,6 +471,7 @@ input[readonly] {
   max-width: 38rem;
   margin: 1.5rem auto;
   text-align: left;
+  border-top: 4px solid var(--orange);
 }
 
 .auth-gate p {
@@ -484,9 +502,11 @@ input[readonly] {
   gap: 0.65rem;
   background: #ffffff;
   border: 1px solid var(--line);
+  border-left: 4px solid var(--orange);
   border-radius: 0.65rem;
   padding: 0.65rem 1rem;
   margin: 0 0 1rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
 }
 
 .session-identity {
@@ -509,18 +529,18 @@ input[readonly] {
   display: block;
   object-fit: cover;
   border: 2px solid var(--orange);
-  background: var(--background);
+  background: var(--orange-50);
 }
 
 .user-avatar-fallback {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--header-bg);
-  color: #ffe0cc;
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 700;
   font-size: 0.95rem;
-  border: 2px solid var(--orange);
+  border: 2px solid var(--orange-200);
 }
 
 .session-text {
@@ -550,7 +570,7 @@ textarea {
 /* Validación tras interacción (:user-invalid / :user-valid con fallback :is) */
 :is(input, select, textarea):is(:user-invalid, .user-invalid-fallback) {
   border-color: var(--err-border);
-  background-color: #fff6f5;
+  background-color: var(--err-bg);
 }
 
 :is(input, select, textarea):is(:user-invalid, .user-invalid-fallback) + .error-msg {
@@ -558,7 +578,7 @@ textarea {
 }
 
 :is(input, select, textarea):is(:user-valid, .user-valid-fallback) {
-  border-color: #2f7d4d;
+  border-color: var(--ok-ink);
 }
 
 button,
@@ -570,12 +590,14 @@ button,
   justify-content: center;
   gap: 0.35rem;
   text-decoration: none;
+  transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
 }
 
 button:hover:not(:disabled),
 .btn:hover {
-  border-color: var(--accent);
-  background: #fdf0e5;
+  border-color: var(--orange);
+  background: var(--orange-50);
+  color: var(--orange-900);
 }
 
 button.primary,
@@ -588,16 +610,19 @@ button.primary,
 button.primary:hover:not(:disabled),
 .btn.primary:hover {
   background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff;
 }
 
 button.danger {
-  border-color: #c56a60;
+  border-color: #fca5a5;
   color: var(--err-ink);
 }
 
 button.danger:hover:not(:disabled) {
   background: var(--err-bg);
   border-color: var(--err-border);
+  color: var(--err-ink);
 }
 
 button:disabled {
@@ -614,12 +639,13 @@ button:disabled {
 dialog {
   background: var(--paper);
   border: 1px solid var(--line);
+  border-top: 5px solid var(--orange);
   border-radius: 0.9rem;
   padding: clamp(1.1rem, 3vw, 1.55rem);
   max-width: min(32rem, calc(100% - 2rem));
   width: 100%;
   margin: auto;
-  box-shadow: 0 20px 45px rgb(43 34 31 / 0.25);
+  box-shadow: 0 20px 45px rgb(15 23 42 / 0.22);
 }
 
 dialog:modal {
@@ -627,7 +653,7 @@ dialog:modal {
 }
 
 dialog::backdrop {
-  background: rgb(52 35 29 / 0.62);
+  background: rgb(15 23 42 / 0.55);
   backdrop-filter: blur(2px);
   overflow: hidden;
   overscroll-behavior: contain;
@@ -656,7 +682,7 @@ dialog::backdrop {
   border-radius: 0.65rem;
   padding: 0.95rem 1rem;
   margin-bottom: 0.75rem;
-  background: #fffdfb;
+  background: var(--surface-subtle);
 }
 
 .admin-meta {
@@ -698,6 +724,25 @@ body > footer {
 
 [hidden] {
   display: none !important;
+}
+
+@media (forced-colors: active) {
+  .space-card,
+  section,
+  .session-bar,
+  .slot-grid .item,
+  .admin-card {
+    border-color: CanvasText;
+  }
+
+  .week [aria-current="date"],
+  button.primary,
+  .btn.primary,
+  .tabs button[aria-selected="true"] {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
 }
 
 @media (max-width: 880px) {
