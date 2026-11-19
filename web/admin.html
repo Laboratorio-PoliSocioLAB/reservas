@@ -29,9 +29,9 @@
 
     <section id="loginSection" aria-labelledby="loginTitle" hidden>
       <h2 id="loginTitle">Acceso del personal autorizado</h2>
-      <p class="muted">Inicia sesión con tu cuenta de personal registrada en PoliSocioLAB (<code>@go.ugr.es</code>).</p>
+      <p class="muted">Inicia sesión con tu cuenta de Google autorizada del personal de PoliSocioLAB (<code>@go.ugr.es</code>).</p>
 
-      <div class="actions" style="margin-bottom:0.5rem">
+      <div class="actions">
         <button id="googleStaffLoginBtn" type="button" class="primary google-btn">
           <span class="google-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="16" height="16">
@@ -44,23 +44,6 @@
           <span>Entrar con Google (@go.ugr.es)</span>
         </button>
       </div>
-
-      <div class="auth-divider" aria-hidden="true">o con contraseña</div>
-
-      <form id="loginForm" style="max-width:26rem">
-        <div class="field">
-          <label for="staffEmail">Correo del personal</label>
-          <input id="staffEmail" type="email" autocomplete="email" required placeholder="vcalero@go.ugr.es">
-        </div>
-        <div class="field">
-          <label for="staffPassword">Contraseña</label>
-          <input id="staffPassword" type="password" autocomplete="current-password" required>
-        </div>
-        <div class="actions">
-          <button id="loginSubmit" type="submit" class="primary">Entrar</button>
-          <button id="magicLinkBtn" type="button">Enviar enlace de acceso por correo</button>
-        </div>
-      </form>
     </section>
 
     <div id="adminPanel" hidden>

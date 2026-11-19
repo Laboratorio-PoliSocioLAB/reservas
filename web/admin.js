@@ -406,39 +406,6 @@ $('googleStaffLoginBtn').addEventListener('click', async () => {
   }
 });
 
-$('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  setStatus('Iniciando sesión…', 'info');
-  const { error } = await supabase.auth.signInWithPassword({
-    email: $('staffEmail').value.trim(),
-    password: $('staffPassword').value,
-  });
-  if (error) {
-    setStatus('No se pudo iniciar sesión: ' + error.message, 'error');
-    return;
-  }
-  setStatus('');
-  await checkSession();
-});
-
-$('magicLinkBtn').addEventListener('click', async () => {
-  const email = $('staffEmail').value.trim();
-  if (!email) {
-    setStatus('Escribe primero tu correo del personal.', 'error');
-    return;
-  }
-  setStatus('Enviando enlace de acceso…', 'info');
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href },
-  });
-  if (error) {
-    setStatus('No se pudo enviar el enlace: ' + error.message, 'error');
-    return;
-  }
-  setStatus('Te hemos enviado un enlace de acceso a ' + email + '. Ábrelo desde este mismo navegador.', 'ok');
-});
-
 $('blockForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = $('addBlockBtn');
