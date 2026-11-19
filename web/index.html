@@ -186,9 +186,20 @@
       </div>
 
       <div class="field">
-        <label for="purpose">Motivo o asignatura (opcional)</label>
+        <label for="purpose">Motivo o asignatura</label>
         <span id="purposeHint" class="hint">Ej.: práctica de radio, entrevista de TFG, grupo de discusión…</span>
-        <textarea id="purpose" name="purpose" maxlength="400" aria-describedby="purposeHint"></textarea>
+        <textarea
+          id="purpose"
+          name="purpose"
+          required
+          minlength="3"
+          maxlength="400"
+          aria-describedby="purposeHint"
+          data-error="purposeError"
+        ></textarea>
+        <div id="purposeError" class="error-msg">
+          <span role="img" aria-label="Error">❌</span> Indica brevemente el motivo o la asignatura de la reserva.
+        </div>
       </div>
 
       <p id="requestError" class="notice" role="alert" data-kind="error" hidden></p>

@@ -100,7 +100,7 @@ function buildEmailContent(booking: {
     RECHAZADA: {
       subject: `Solicitud rechazada · ${booking.resource_label} (${dateEs} ${start}–${end})`,
       heading: 'Tu solicitud no ha podido ser aprobada',
-      lead: 'La Facultad ha rechazado tu solicitud para esta franja. Puedes consultar otros horarios libres en el calendario de PoliSocioLAB.',
+      lead: 'Se ha rechazado la solicitud.',
       badgeBg: '#fcebe8',
       badgeColor: '#8c281f',
     },
@@ -115,7 +115,7 @@ function buildEmailContent(booking: {
 
   const meta = metaByStatus[booking.status] ?? metaByStatus.RECHAZADA;
   const noteBlock = booking.review_note
-    ? `<p style="margin:16px 0;padding:12px 14px;background:#fff8f2;border-left:4px solid #f37020;border-radius:4px"><strong>Nota de la Facultad:</strong> ${escapeHtml(booking.review_note)}</p>`
+    ? `<p style="margin:16px 0;padding:12px 14px;background:#fff7f2;border-left:4px solid #f37020;border-radius:4px"><strong>Comentario:</strong> ${escapeHtml(booking.review_note)}</p>`
     : '';
 
   const html = `<!doctype html>
@@ -139,7 +139,6 @@ function buildEmailContent(booking: {
         <tr><td style="padding:8px 12px;color:#475569;border-top:1px solid #e2e8f0">Referencia</td><td style="padding:8px 12px;font-family:monospace;font-size:12px;border-top:1px solid #e2e8f0">${escapeHtml(booking.id)}</td></tr>
       </table>
       ${noteBlock}
-      <p style="margin:20px 0 0;font-size:12px;color:#475569">Este es un mensaje automático del sistema de reservas de PoliSocioLAB. Si necesitas responder, puedes contestar directamente a este correo.</p>
     </div>
   </div>
 </body>
@@ -155,7 +154,7 @@ function buildEmailContent(booking: {
     `Fecha: ${dateEs}`,
     `Horario: ${start}–${end}`,
     booking.purpose ? `Actividad: ${booking.purpose}` : '',
-    booking.review_note ? `Nota de la Facultad: ${booking.review_note}` : '',
+    booking.review_note ? `Comentario: ${booking.review_note}` : '',
     `Referencia: ${booking.id}`,
     '',
     'PoliSocioLAB · Facultad de Ciencias Políticas y Sociología · UGR',

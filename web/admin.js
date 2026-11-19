@@ -108,8 +108,8 @@ function renderPending() {
     const noteInput = document.createElement('input');
     noteInput.type = 'text';
     noteInput.maxLength = 500;
-    noteInput.placeholder = 'Nota opcional para el correo al estudiante…';
-    noteInput.setAttribute('aria-label', 'Nota opcional para el correo');
+    noteInput.placeholder = 'Comentario opcional para el correo al estudiante…';
+    noteInput.setAttribute('aria-label', 'Comentario opcional para el correo');
     noteField.appendChild(noteInput);
 
     const actions = document.createElement('div');
@@ -214,7 +214,7 @@ function renderHistory() {
     if (b.review_note) {
       const note = document.createElement('div');
       note.className = 'muted';
-      note.textContent = `Nota: ${b.review_note}`;
+      note.textContent = `Comentario: ${b.review_note}`;
       meta.appendChild(note);
     }
     if (b.mail_error) {
