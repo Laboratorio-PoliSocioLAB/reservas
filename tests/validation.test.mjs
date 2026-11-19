@@ -64,6 +64,18 @@ test('calcula horas consecutivas disponibles respetando huecos ocupados y límit
       [4, '13:00'],
     ]
   );
+
+  // Modo aforo de 10 plazas (CUALITATIVO2): encuentra automáticamente las 4 horas porque C02 está libre en todas
+  const pool = computeConsecutiveHours(slots, 'CUALITATIVO2', '09:00', 'CUALITATIVO2');
+  assert.deepEqual(
+    pool.map((o) => [o.hours, o.end]),
+    [
+      [1, '10:00'],
+      [2, '11:00'],
+      [3, '12:00'],
+      [4, '13:00'],
+    ]
+  );
 });
 
 test('utilidades de fechas y semanas ISO', () => {
@@ -96,6 +108,13 @@ test('migración SQL y Edge Function existen y contienen restricciones críticas
   assert.match(sqlAuth, /is_verified_go_ugr_user/);
   assert.match(sqlAuth, /revoke all on function public\.submit_booking_request/i);
   assert.match(sqlAuth, /revoke all on function public\.get_public_availability/i);
+
+  const sqlPool = fs.readFileSync(
+    path.join(root, 'supabase/migrations/004_cualitativo2_capacity_pool.sql'),
+    'utf8'
+  );
+  assert.match(sqlPool, /aforo máximo de 10 plazas/i);
+  assert.match(sqlPool, /p_resource_id = 'CUALITATIVO2'/);
 });
 
 test('valida correos exclusivos @go.ugr.es para acceso autenticado', () => {

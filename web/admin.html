@@ -91,26 +91,16 @@
 
       <section id="panelBlocks" role="tabpanel" aria-labelledby="tabBlocks" hidden>
         <h2>Bloqueos de mantenimiento o eventos</h2>
-        <p class="muted">Impide nuevas reservas en un laboratorio completo o en un puesto concreto durante una franja horaria.</p>
+        <p class="muted">Impide nuevas reservas en un laboratorio durante una franja horaria.</p>
 
         <form id="blockForm" style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--line)">
           <div class="grid-2">
             <div class="field">
-              <label for="blockTarget">Espacio o puesto</label>
+              <label for="blockTarget">Laboratorio</label>
               <select id="blockTarget" required>
                 <option value="RADIO">Laboratorio de radio</option>
                 <option value="CUALITATIVO1">Laboratorio cualitativo 1</option>
-                <option value="CUALITATIVO2">Laboratorio cualitativo 2 (todos los puestos)</option>
-                <option value="C01">Cualitativo 2 · Puesto 01</option>
-                <option value="C02">Cualitativo 2 · Puesto 02</option>
-                <option value="C03">Cualitativo 2 · Puesto 03</option>
-                <option value="C04">Cualitativo 2 · Puesto 04</option>
-                <option value="C05">Cualitativo 2 · Puesto 05</option>
-                <option value="C06">Cualitativo 2 · Puesto 06</option>
-                <option value="C07">Cualitativo 2 · Puesto 07</option>
-                <option value="C08">Cualitativo 2 · Puesto 08</option>
-                <option value="C09">Cualitativo 2 · Puesto 09</option>
-                <option value="C10">Cualitativo 2 · Puesto 10</option>
+                <option value="CUALITATIVO2">Laboratorio cualitativo 2 (aforo completo)</option>
               </select>
             </div>
             <div class="field">

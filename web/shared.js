@@ -15,9 +15,10 @@ export const ROOM_NAMES = {
 export const RESOURCE_LABELS = Object.fromEntries([
   ['RADIO', 'Laboratorio de radio'],
   ['CUALITATIVO1', 'Laboratorio cualitativo 1'],
+  ['CUALITATIVO2', 'Laboratorio cualitativo 2'],
   ...Array.from({ length: 10 }, (_, i) => {
     const num = String(i + 1).padStart(2, '0');
-    return ['C' + num, 'Laboratorio cualitativo 2 · Puesto ' + num];
+    return ['C' + num, 'Laboratorio cualitativo 2'];
   }),
 ]);
 
@@ -47,11 +48,24 @@ export function mondayOf(iso) {
 
 export function computeConsecutiveHours(slots, room, start, resourceId, maxHours = 6) {
   const roomSlots = (slots || []).filter((s) => s.room === room);
+  const isCapacityPool = room === 'CUALITATIVO2' && resourceId === 'CUALITATIVO2';
   let cursor = start;
+  let sharedCandidates = null;
   const options = [];
   for (let h = 1; h <= maxHours; h++) {
     const next = roomSlots.find((s) => s.start === cursor);
-    if (!next || !Array.isArray(next.available) || !next.available.includes(resourceId)) break;
+    if (!next || !Array.isArray(next.available)) break;
+
+    if (isCapacityPool) {
+      sharedCandidates =
+        sharedCandidates === null
+          ? [...next.available]
+          : sharedCandidates.filter((id) => next.available.includes(id));
+      if (!sharedCandidates.length) break;
+    } else if (!next.available.includes(resourceId)) {
+      break;
+    }
+
     options.push({
       hours: h,
       start,

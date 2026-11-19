@@ -8,7 +8,7 @@ const supabase = configured ? createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_
 
 const TARGET_LABELS = {
   ...RESOURCE_LABELS,
-  CUALITATIVO2: 'Laboratorio cualitativo 2 (todos los puestos)',
+  CUALITATIVO2: 'Laboratorio cualitativo 2 (aforo completo)',
 };
 
 let allBookings = [];

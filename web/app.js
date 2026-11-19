@@ -166,9 +166,12 @@ function renderRoom(containerId, roomKey) {
     const meta = document.createElement('span');
     meta.className = 'muted';
     if (isMultiSeat) {
-      meta.textContent = slot.available.length
-        ? `${slot.available.length} de 10 puestos libres`
-        : 'Sin puestos libres';
+      meta.textContent =
+        slot.available.length === 1
+          ? '1 de 10 plazas libres'
+          : slot.available.length
+            ? `${slot.available.length} de 10 plazas libres`
+            : 'Sin plazas libres (0 de 10)';
     } else {
       meta.textContent = slot.available.length ? 'Disponible' : 'Ocupado';
     }
@@ -184,10 +187,10 @@ function renderRoom(containerId, roomKey) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'primary';
-      btn.textContent = isMultiSeat ? 'Elegir puesto' : 'Solicitar';
+      btn.textContent = 'Solicitar';
       btn.setAttribute(
         'aria-label',
-        `${btn.textContent} · ${ROOM_NAMES[roomKey]} · ${slot.start}–${slot.end}`
+        `Solicitar · ${ROOM_NAMES[roomKey]} · ${slot.start}–${slot.end}`
       );
       btn.addEventListener('click', () => openRequestDialog(slot));
       row.appendChild(btn);
@@ -219,47 +222,15 @@ function updateDurationSelect() {
 function openRequestDialog(slot) {
   state.activeSlot = slot;
   const isMultiSeat = slot.room === 'CUALITATIVO2';
-  state.selectedResource = slot.available[0];
+  state.selectedResource = isMultiSeat ? 'CUALITATIVO2' : slot.available[0];
 
   $('requestForm').reset();
   $('requesterName').value = state.userName || '';
   $('requesterEmail').value = state.userEmail || '';
   $('requestError').hidden = true;
+  const capacityText = isMultiSeat ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
   $('requestMeta').textContent =
-    `${ROOM_NAMES[slot.room]} · ${formatDateShortEs(slot.date)} · inicio a las ${slot.start}`;
-
-  const seatField = $('seatField');
-  seatField.hidden = !isMultiSeat;
-
-  if (isMultiSeat) {
-    const grid = $('seatGrid');
-    grid.innerHTML = '';
-    for (let i = 1; i <= 10; i++) {
-      const code = 'C' + String(i).padStart(2, '0');
-      const free = slot.available.includes(code);
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'seat-btn';
-      btn.dataset.seat = code;
-      btn.disabled = !free;
-      btn.setAttribute('aria-pressed', code === state.selectedResource ? 'true' : 'false');
-
-      const label = document.createElement('span');
-      label.textContent = `Puesto ${String(i).padStart(2, '0')}`;
-      const badge = document.createElement('small');
-      badge.textContent = free ? 'Libre' : 'Ocupado';
-      btn.append(label, badge);
-
-      btn.addEventListener('click', () => {
-        state.selectedResource = code;
-        for (const el of grid.querySelectorAll('button')) {
-          el.setAttribute('aria-pressed', el.dataset.seat === code ? 'true' : 'false');
-        }
-        updateDurationSelect();
-      });
-      grid.appendChild(btn);
-    }
-  }
+    `${ROOM_NAMES[slot.room]} · ${formatDateShortEs(slot.date)} · inicio a las ${slot.start}${capacityText}`;
 
   updateDurationSelect();
   $('requestDialog').showModal();

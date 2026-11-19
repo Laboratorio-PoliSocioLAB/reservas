@@ -439,25 +439,6 @@ dialog::backdrop {
   overscroll-behavior: contain;
 }
 
-.seat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
-  margin: 0.45rem 0 0.85rem;
-}
-
-.seat-btn {
-  justify-content: space-between;
-  width: 100%;
-  font-weight: 600;
-}
-
-.seat-btn[aria-pressed="true"] {
-  background: #fce5d5;
-  border-color: var(--accent);
-  color: #6b2606;
-}
-
 .dialog-actions {
   display: flex;
   flex-wrap: wrap;
