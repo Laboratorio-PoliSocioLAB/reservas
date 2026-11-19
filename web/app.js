@@ -339,8 +339,6 @@ function openRequestDialog(slot) {
   state.selectedResource = isCapacityPool ? 'CUALITATIVO2' : slot.available[0];
 
   $('requestForm').reset();
-  $('requesterName').value = state.userName || state.userEmail.split('@')[0] || '';
-  $('requesterEmail').value = state.userEmail || '';
   $('requestError').hidden = true;
   const capacityText = isCapacityPool ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
   $('requestMeta').textContent =
