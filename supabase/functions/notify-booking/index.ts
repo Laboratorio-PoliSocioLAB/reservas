@@ -93,7 +93,7 @@ function buildEmailContent(booking: {
     APROBADA: {
       subject: `Reserva aprobada · ${booking.resource_label} (${dateEs} ${start}–${end})`,
       heading: 'Tu reserva ha sido aprobada',
-      lead: 'La Facultad ha confirmado tu solicitud de uso del laboratorio. Adjuntamos un archivo de calendario (.ics) para que puedas guardarla.',
+      lead: '',
       badgeBg: '#e4f3ea',
       badgeColor: '#1b5e36',
     },
@@ -130,7 +130,7 @@ function buildEmailContent(booking: {
       <span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:${meta.badgeBg};color:${meta.badgeColor}">${escapeHtml(booking.status)}</span>
       <h1 style="font-size:20px;margin:12px 0 8px">${escapeHtml(meta.heading)}</h1>
       <p style="margin:0 0 16px;line-height:1.5">Hola, ${escapeHtml(booking.requester_name)}:</p>
-      <p style="margin:0 0 16px;line-height:1.5">${escapeHtml(meta.lead)}</p>
+      ${meta.lead ? `<p style="margin:0 0 16px;line-height:1.5">${escapeHtml(meta.lead)}</p>` : ''}
       <table style="width:100%;border-collapse:collapse;background:#faf7f4;border:1px solid #e5d9d0;border-radius:6px">
         <tr><td style="padding:8px 12px;color:#64524a;width:120px">Espacio</td><td style="padding:8px 12px;font-weight:600">${escapeHtml(booking.resource_label)}</td></tr>
         <tr><td style="padding:8px 12px;color:#64524a;border-top:1px solid #eee5de">Fecha</td><td style="padding:8px 12px;font-weight:600;border-top:1px solid #eee5de">${escapeHtml(dateEs)}</td></tr>
