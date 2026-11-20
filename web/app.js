@@ -401,10 +401,10 @@ function renderSelectedRoomSlots() {
   const list = state.slots.filter((s) => s.room === roomKey);
   const isCapacityPool = roomKey === 'CUALITATIVO2';
 
-  $('slotsSummary').textContent = list.length
-    ? isCapacityPool
-      ? 'Horario 08:00–21:00 · Hasta 10 plazas por franja'
-      : 'Horario 08:00–21:00'
+  const summary = $('slotsSummary');
+  summary.hidden = list.length > 0 && !isCapacityPool;
+  summary.textContent = list.length
+    ? 'Horario 08:00–21:00 · Hasta 10 plazas por franja'
     : 'Cerrado este día';
 
   if (!list.length) {
