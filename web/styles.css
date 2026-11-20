@@ -817,13 +817,6 @@ main {
   color: var(--muted);
 }
 
-.picker-meta {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
 .space-picker-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
