@@ -36,8 +36,8 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SPACE_META = {
   RADIO: {
     name: ROOM_NAMES.RADIO,
-    subtitle: 'Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.',
-    caption: 'Cabina de locución y control técnico · Uso exclusivo por turno.',
+    subtitle: 'Lunes a viernes, 08:00–21:00.',
+    caption: 'Cabina de locución y control técnico.',
     image: 'assets/space-radio.webp',
     alt: 'Cabina y mesa de control del Laboratorio de radio',
     width: 958,
@@ -46,8 +46,8 @@ const SPACE_META = {
   },
   CUALITATIVO1: {
     name: ROOM_NAMES.CUALITATIVO1,
-    subtitle: 'Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.',
-    caption: 'Sala de grupos de discusión y entrevistas · Uso exclusivo por turno.',
+    subtitle: 'Lunes a viernes, 08:00–21:00.',
+    caption: 'Sala de grupos de discusión y entrevistas.',
     image: 'assets/space-cualitativo1.webp',
     alt: 'Grupo reunido alrededor de la mesa del Laboratorio cualitativo 1',
     width: 1440,
@@ -404,7 +404,7 @@ function renderSelectedRoomSlots() {
   $('slotsSummary').textContent = list.length
     ? isCapacityPool
       ? 'Horario 08:00–21:00 · Hasta 10 plazas por franja'
-      : 'Horario 08:00–21:00 · Uso exclusivo por franja'
+      : 'Horario 08:00–21:00'
     : 'Cerrado este día';
 
   if (!list.length) {
@@ -454,9 +454,12 @@ function renderSelectedRoomSlots() {
       const track = document.createElement('span');
       track.className = freeCount ? 'room-bar-track' : 'room-bar-track is-full';
       track.setAttribute('aria-hidden', 'true');
-      const desc = document.createElement('span');
-      desc.textContent = freeCount ? 'Uso exclusivo' : 'Reservado o bloqueado';
-      bar.append(track, desc);
+      bar.appendChild(track);
+      if (!freeCount) {
+        const desc = document.createElement('span');
+        desc.textContent = 'Reservado o bloqueado';
+        bar.appendChild(desc);
+      }
       visualEl.appendChild(bar);
     }
 
