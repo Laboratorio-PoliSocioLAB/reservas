@@ -47,7 +47,7 @@ Portal oficial de reservas de PoliSocioLAB (UGR) con verificación de identidad 
 ## Evidence on Hand
 
 * Logotipo oficial: `web/assets/logo-facultad.jpg` (490×130).
-* Ilustraciones vectoriales provisionales de los 3 laboratorios: `web/assets/space-radio.svg`, `web/assets/space-cualitativo1.svg`, `web/assets/space-cualitativo2.svg`.
+* Fotografías de los tres laboratorios: `web/assets/space-radio.webp`, `web/assets/space-cualitativo1.webp`, `web/assets/space-cualitativo2.webp`.
 * Datos reales de espacios: Laboratorio de radio (uso exclusivo, 1 reserva por turno), Laboratorio cualitativo 1 (uso exclusivo, 1 reserva por turno), Laboratorio cualitativo 2 (aforo compartido de hasta 10 plazas).
 * Falta fotografía real de las salas (no inventar fotos falsas ni métricas inexistentes).
 

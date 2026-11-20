@@ -37,24 +37,30 @@ const SPACE_META = {
     name: ROOM_NAMES.RADIO,
     subtitle: 'Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.',
     caption: 'Cabina de locución y control técnico · Uso exclusivo por turno.',
-    image: 'assets/space-radio.svg',
-    alt: 'Esquema arquitectónico del Laboratorio de radio',
+    image: 'assets/space-radio.webp',
+    alt: 'Cabina y mesa de control del Laboratorio de radio',
+    width: 958,
+    height: 1128,
     capacity: 1,
   },
   CUALITATIVO1: {
     name: ROOM_NAMES.CUALITATIVO1,
     subtitle: 'Uso exclusivo por turno · Lunes a viernes, 08:00–21:00.',
     caption: 'Sala de grupos de discusión y entrevistas · Uso exclusivo por turno.',
-    image: 'assets/space-cualitativo1.svg',
-    alt: 'Esquema arquitectónico del Laboratorio cualitativo 1',
+    image: 'assets/space-cualitativo1.webp',
+    alt: 'Grupo reunido alrededor de la mesa del Laboratorio cualitativo 1',
+    width: 1440,
+    height: 1080,
     capacity: 1,
   },
   CUALITATIVO2: {
     name: ROOM_NAMES.CUALITATIVO2,
     subtitle: 'Aforo compartido de 10 plazas simultáneas · Lunes a viernes, 08:00–21:00.',
     caption: '10 puestos individuales con asignación automática de plaza libre.',
-    image: 'assets/space-cualitativo2.svg',
-    alt: 'Esquema arquitectónico del Laboratorio cualitativo 2 de 10 plazas',
+    image: 'assets/space-cualitativo2.webp',
+    alt: 'Fila de puestos informáticos del Laboratorio cualitativo 2',
+    width: 1440,
+    height: 1084,
     capacity: 10,
   },
 };
@@ -319,8 +325,11 @@ function updateRoomHeader() {
   if (!meta) return;
   $('detailSpaceTitle').textContent = meta.name;
   $('detailSpaceSubtitle').textContent = meta.subtitle;
-  $('detailSpaceImg').src = meta.image;
-  $('detailSpaceImg').alt = meta.alt;
+  const detailImage = $('detailSpaceImg');
+  detailImage.width = meta.width;
+  detailImage.height = meta.height;
+  detailImage.alt = meta.alt;
+  detailImage.src = meta.image;
   $('detailSpaceCaption').textContent = meta.caption;
   document.title = `${meta.name} · PoliSocioLAB (UGR)`;
 }
