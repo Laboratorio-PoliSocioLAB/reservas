@@ -739,7 +739,7 @@ main {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 8 / 3;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -853,7 +853,7 @@ main {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 8 / 3;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
@@ -1024,8 +1024,8 @@ main {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 8 / 3;
-  object-fit: cover;
+  max-height: 17rem;
+  object-fit: contain;
 }
 
 .rail-plan figcaption {
