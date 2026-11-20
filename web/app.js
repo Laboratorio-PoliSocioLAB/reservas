@@ -404,7 +404,7 @@ function renderSelectedRoomSlots() {
   const summary = $('slotsSummary');
   summary.hidden = list.length > 0 && !isCapacityPool;
   summary.textContent = list.length
-    ? 'Horario 08:00–21:00 · Hasta 10 plazas por franja'
+    ? 'Hasta 10 plazas por franja'
     : 'Cerrado este día';
 
   if (!list.length) {
