@@ -3,6 +3,7 @@ import { CONFIG, isConfigured } from './config.js';
 import {
   ROOM_NAMES,
   RESOURCE_LABELS,
+  TEACHING_ROOM_ID,
   isValidGoUgrEmail,
   getGoogleIdentityDisplayName,
   getSafeGoogleAvatarUrl,
@@ -145,17 +146,20 @@ function buildDemoAvailability(requestedDate) {
             !demoState.bookings.some(
               (b) =>
                 b.status === 'APROBADA' &&
-                b.resource_id === id &&
+                (b.resource_id === id || (r.room === 'CUALITATIVO2' && b.resource_id === TEACHING_ROOM_ID)) &&
                 b.date === date &&
                 b.start < end &&
                 start < b.end
             )
         );
-        slots.push({ room: r.room, date, start, end, available });
+        slots.push({
+          room: r.room, date, start, end, available,
+          whole_room_available: r.room === 'CUALITATIVO2' && available.length === r.ids.length,
+        });
       }
     }
   }
-  return { date, today, last_date: lastDate, slots };
+  return { date, today, last_date: lastDate, can_request_whole_room: true, slots };
 }
 
 function readInitialUrlParams() {
@@ -178,6 +182,7 @@ const state = {
   slots: [],
   activeSlot: null,
   selectedResource: '',
+  canRequestWholeRoom: false,
   loadSeq: 0,
   userEmail: '',
   userName: '',
@@ -239,6 +244,7 @@ function showAuthGate(message = '', kind = 'info') {
   state.userEmail = '';
   state.userName = '';
   $('topbarSession').hidden = true;
+  state.canRequestWholeRoom = false;
   $('authGate').hidden = false;
   $('spacePicker').hidden = true;
   $('appContent').hidden = true;
@@ -324,7 +330,9 @@ function updateRoomHeader() {
   const meta = SPACE_META[state.selectedRoom];
   if (!meta) return;
   $('detailSpaceTitle').textContent = meta.name;
-  $('detailSpaceSubtitle').textContent = meta.subtitle;
+  $('detailSpaceSubtitle').textContent = state.selectedRoom === 'CUALITATIVO2' && state.canRequestWholeRoom
+    ? 'Reserva una de las 10 plazas o solicita la sala completa para docencia en un turno libre.'
+    : meta.subtitle;
   const detailImage = $('detailSpaceImg');
   detailImage.width = meta.width;
   detailImage.height = meta.height;
@@ -521,11 +529,7 @@ function updateDurationSelect() {
   const select = $('duration');
   select.replaceChildren();
 
-  const list = opts.length
-    ? opts
-    : [{ hours: 1, label: `1 hora (${slot.start}–${slot.end})` }];
-
-  for (const item of list) {
+  for (const item of opts) {
     const opt = document.createElement('option');
     opt.value = String(item.hours);
     opt.textContent = item.label;
@@ -533,23 +537,38 @@ function updateDurationSelect() {
   }
 }
 
-function openRequestDialog(slot) {
-  state.activeSlot = slot;
+function updateRequestMode() {
+  const slot = state.activeSlot;
   const isCapacityPool = slot.room === 'CUALITATIVO2';
-  state.selectedResource = isCapacityPool ? 'CUALITATIVO2' : slot.available[0];
+  const wholeRoom = isCapacityPool && !$('requestModeField').hidden && $('requestMode').value === 'whole-room';
+  state.selectedResource = wholeRoom ? TEACHING_ROOM_ID : isCapacityPool ? 'CUALITATIVO2' : slot.available[0];
 
-  $('requestForm').reset();
-  $('purpose').setCustomValidity('');
-  $('requestError').hidden = true;
-  updatePurposeCounter();
-  const capacityText = isCapacityPool ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
+  const capacityText = wholeRoom
+    ? ' · Sala completa'
+    : isCapacityPool ? ` · 1 plaza (${slot.available.length}/10 libres)` : '';
   $('requestMeta').textContent =
     `${ROOM_NAMES[slot.room]} · ${formatDateShortEs(slot.date)} · inicio a las ${slot.start}${capacityText}`;
-
+  $('purposeHint').textContent = wholeRoom
+    ? 'Indica la asignatura y la actividad docente prevista.'
+    : 'Indica brevemente la práctica, entrevista de TFG o grupo de discusión.';
+  $('purpose').placeholder = wholeRoom
+    ? 'Ej.: práctica de análisis cualitativo de la asignatura Métodos de Investigación'
+    : 'Ej.: grabación de podcast de asignatura, entrevista de TFG…';
+  $('requestError').hidden = true;
   updateDurationSelect();
-  $('requestDialog').showModal();
-  $('duration').focus();
 }
+
+function openRequestDialog(slot) {
+  state.activeSlot = slot;
+  $('requestForm').reset();
+  $('requestModeField').hidden = !(state.canRequestWholeRoom && slot.whole_room_available);
+  updatePurposeCounter();
+  updateRequestMode();
+  $('requestDialog').showModal();
+  ($('requestModeField').hidden ? $('duration') : $('requestMode')).focus();
+}
+
+$('requestMode').addEventListener('change', updateRequestMode);
 
 async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
   const seq = ++state.loadSeq;
@@ -577,6 +596,7 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
     state.today = data.today;
     state.lastDate = data.last_date;
     state.slots = data.slots || [];
+    state.canRequestWholeRoom = data.can_request_whole_room === true;
 
     if (state.selectedRoom) {
       updateRoomHeader();
@@ -748,7 +768,7 @@ $('requestForm').addEventListener('submit', async (event) => {
 
   try {
     const slot = state.activeSlot;
-    const hours = Number($('duration').value) || 1;
+    const hours = Number($('duration').value);
     const payload = {
       p_name: state.userName || state.userEmail.split('@')[0] || '',
       p_email: state.userEmail,

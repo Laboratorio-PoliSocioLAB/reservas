@@ -320,6 +320,13 @@
     </div>
 
     <form id="requestForm" novalidate>
+      <div id="requestModeField" class="field" hidden>
+        <label for="requestMode">Qué quieres reservar</label>
+        <select id="requestMode" autocomplete="off">
+          <option value="seat">Una plaza</option>
+          <option value="whole-room">Sala completa para docencia</option>
+        </select>
+      </div>
       <div class="field">
         <label for="duration">Duración</label>
         <span id="durationHint" class="hint">Puedes reservar varias horas consecutivas mientras el espacio esté libre.</span>

@@ -8,6 +8,7 @@ import {
   getGoogleIdentityDisplayName,
   getSafeGoogleAvatarUrl,
   computeConsecutiveHours,
+  TEACHING_ROOM_ID,
   addDays,
   mondayOf,
   formatDateShortEs,
@@ -81,6 +82,19 @@ test('calcula horas consecutivas disponibles respetando huecos ocupados y límit
       [4, '13:00'],
     ]
   );
+});
+
+test('la duración docente termina en la primera franja que no tiene la sala completa libre', () => {
+  const room = 'CUALITATIVO2';
+  const slots = [
+    { room, start: '09:00', end: '10:00', available: ['C01', 'C02'], whole_room_available: true },
+    { room, start: '10:00', end: '11:00', available: ['C02'], whole_room_available: false },
+    { room, start: '11:00', end: '12:00', available: ['C01', 'C02'], whole_room_available: true },
+  ];
+
+  assert.deepEqual(computeConsecutiveHours(slots, room, '09:00', TEACHING_ROOM_ID).map(({ hours }) => hours), [1]);
+  assert.deepEqual(computeConsecutiveHours(slots, room, '10:00', TEACHING_ROOM_ID), []);
+  assert.equal(computeConsecutiveHours(slots, room, '09:00', room).length, 3);
 });
 
 test('utilidades de fechas y semanas ISO', () => {
@@ -176,8 +190,9 @@ test('frontend evita CDNs externos, inline styles, innerHTML y window.prompt', (
 
   assert.match(indexHtml, /id="spacePicker"/);
   assert.match(indexHtml, /id="backToSpacesBtn"/);
-  assert.doesNotMatch(indexHtml, /sala completa/i);
-  assert.doesNotMatch(appJs, /sala completa/i);
+  assert.match(indexHtml, /id="requestModeField"[^>]*hidden/);
+  const pickerHtml = indexHtml.split('id="spacePicker"')[1].split('</section>')[0];
+  assert.doesNotMatch(pickerHtml, /sala completa/i);
   assert.match(adminHtml, /<dialog id="cancelDialog"/);
   assert.match(adminHtml, /<dialog id="deleteBlockDialog"/);
   const adminHtmlNoComments = adminHtml.replace(/<!--[\s\S]*?-->/g, '');

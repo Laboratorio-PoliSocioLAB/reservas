@@ -12,10 +12,13 @@ export const ROOM_NAMES = {
   CUALITATIVO2: 'Laboratorio cualitativo 2',
 };
 
+export const TEACHING_ROOM_ID = 'CUALITATIVO2_DOCENCIA';
+
 export const RESOURCE_LABELS = Object.fromEntries([
   ['RADIO', 'Laboratorio de radio'],
   ['CUALITATIVO1', 'Laboratorio cualitativo 1'],
   ['CUALITATIVO2', 'Laboratorio cualitativo 2'],
+  [TEACHING_ROOM_ID, 'Laboratorio cualitativo 2 (sala completa para docencia)'],
   ...Array.from({ length: 10 }, (_, i) => {
     const num = String(i + 1).padStart(2, '0');
     return ['C' + num, 'Laboratorio cualitativo 2'];
@@ -129,7 +132,7 @@ export function computeConsecutiveHours(slots, room, start, resourceId, maxHours
           ? [...next.available]
           : sharedCandidates.filter((id) => next.available.includes(id));
       if (!sharedCandidates.length) break;
-    } else if (!next.available.includes(resourceId)) {
+    } else if (resourceId === TEACHING_ROOM_ID ? !next.whole_room_available : !next.available.includes(resourceId)) {
       break;
     }
 
