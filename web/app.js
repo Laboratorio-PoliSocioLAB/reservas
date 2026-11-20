@@ -36,7 +36,6 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SPACE_META = {
   RADIO: {
     name: ROOM_NAMES.RADIO,
-    subtitle: 'Lunes a viernes, 08:00–21:00.',
     caption: 'Cabina de locución y control técnico.',
     image: 'assets/space-radio.webp',
     alt: 'Cabina y mesa de control del Laboratorio de radio',
@@ -46,7 +45,6 @@ const SPACE_META = {
   },
   CUALITATIVO1: {
     name: ROOM_NAMES.CUALITATIVO1,
-    subtitle: 'Lunes a viernes, 08:00–21:00.',
     caption: 'Sala de grupos de discusión y entrevistas.',
     image: 'assets/space-cualitativo1.webp',
     alt: 'Grupo reunido alrededor de la mesa del Laboratorio cualitativo 1',
@@ -56,7 +54,7 @@ const SPACE_META = {
   },
   CUALITATIVO2: {
     name: ROOM_NAMES.CUALITATIVO2,
-    subtitle: 'Aforo compartido de 10 plazas simultáneas · Lunes a viernes, 08:00–21:00.',
+    subtitle: 'Aforo compartido de 10 plazas simultáneas.',
     caption: '10 puestos individuales con asignación automática de plaza libre.',
     image: 'assets/space-cualitativo2.webp',
     alt: 'Fila de puestos informáticos del Laboratorio cualitativo 2',
@@ -330,9 +328,11 @@ function updateRoomHeader() {
   const meta = SPACE_META[state.selectedRoom];
   if (!meta) return;
   $('detailSpaceTitle').textContent = meta.name;
-  $('detailSpaceSubtitle').textContent = state.selectedRoom === 'CUALITATIVO2' && state.canRequestWholeRoom
+  const subtitle = $('detailSpaceSubtitle');
+  subtitle.textContent = state.selectedRoom === 'CUALITATIVO2' && state.canRequestWholeRoom
     ? 'Reserva una de las 10 plazas o solicita la sala completa para docencia en un turno libre.'
-    : meta.subtitle;
+    : meta.subtitle || '';
+  subtitle.hidden = !subtitle.textContent;
   const detailImage = $('detailSpaceImg');
   detailImage.width = meta.width;
   detailImage.height = meta.height;
