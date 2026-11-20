@@ -18,7 +18,7 @@ import {
   formatDateShortEs,
   initDialogLightDismissFallback,
   initAccessibleValidation,
-} from './shared.js';
+} from './shared.js?v=docencia';
 
 const $ = (id) => document.getElementById(id);
 const demoMode = !isConfigured();
@@ -540,7 +540,7 @@ function updateDurationSelect() {
 function updateRequestMode() {
   const slot = state.activeSlot;
   const isCapacityPool = slot.room === 'CUALITATIVO2';
-  const wholeRoom = isCapacityPool && !$('requestModeField').hidden && $('requestMode').value === 'whole-room';
+  const wholeRoom = isCapacityPool && $('requestModeField')?.hidden === false && $('requestMode').value === 'whole-room';
   state.selectedResource = wholeRoom ? TEACHING_ROOM_ID : isCapacityPool ? 'CUALITATIVO2' : slot.available[0];
 
   const capacityText = wholeRoom
@@ -561,14 +561,15 @@ function updateRequestMode() {
 function openRequestDialog(slot) {
   state.activeSlot = slot;
   $('requestForm').reset();
-  $('requestModeField').hidden = !(state.canRequestWholeRoom && slot.whole_room_available);
+  const requestModeField = $('requestModeField');
+  if (requestModeField) requestModeField.hidden = !(state.canRequestWholeRoom && slot.whole_room_available);
   updatePurposeCounter();
   updateRequestMode();
   $('requestDialog').showModal();
-  ($('requestModeField').hidden ? $('duration') : $('requestMode')).focus();
+  (requestModeField?.hidden === false ? $('requestMode') : $('duration')).focus();
 }
 
-$('requestMode').addEventListener('change', updateRequestMode);
+$('requestMode')?.addEventListener('change', updateRequestMode);
 
 async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
   const seq = ++state.loadSeq;

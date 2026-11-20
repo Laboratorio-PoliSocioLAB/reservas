@@ -10,7 +10,7 @@ import {
   formatMadridToday,
   initDialogLightDismissFallback,
   initAccessibleValidation,
-} from './shared.js';
+} from './shared.js?v=docencia';
 
 const $ = (id) => document.getElementById(id);
 const configured = isConfigured();
