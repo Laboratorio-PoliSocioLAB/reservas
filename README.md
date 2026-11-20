@@ -5,8 +5,8 @@ Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de C
 ## Qué incluye
 
 - **3 espacios (12 recursos):**
-  - **Laboratorio de radio** (sala completa).
-  - **Laboratorio cualitativo 1** (sala completa).
+  - **Laboratorio de radio** (uso exclusivo).
+  - **Laboratorio cualitativo 1** (uso exclusivo).
   - **Laboratorio cualitativo 2** (aforo de 10 plazas `C01`–`C10`, asignación y reasignación automática).
 - **Horario configurable:** por defecto lunes a viernes de **08:00 a 21:00**, reservas de **1 a 6 horas consecutivas**.
 - **Acceso exclusivo con Google `@go.ugr.es`:** tanto el portal de reservas como el panel de gestión exigen inicio de sesión con Google Workspace institucional `@go.ugr.es` mediante OAuth **PKCE**, verificado en base de datos (`amr = oauth`, identidad Google confirmada en `auth.identities`, nombre inmutable y correo confirmado).
@@ -61,9 +61,10 @@ supabase secrets set \
   STAFF_NOTIFY_EMAIL="vcalero@ugr.es" \
   ALLOWED_ORIGINS="https://laboratorio-polisociolab.github.io"
 
-supabase functions deploy notify-booking
-supabase functions deploy notify-new-request
+supabase functions deploy notify-booking notify-new-request --use-api --no-verify-jwt
 ```
+
+Las funciones verifican la sesión OAuth y los permisos antes de tramitar los envíos.
 
 Actualiza el código del proyecto de Google Apps Script con `supabase/mail-relay/Code.gs` y publica una nueva versión del despliegue web. (Recomendable migrar el puente a una cuenta funcional del laboratorio en lugar de una cuenta personal y rotar `MAIL_RELAY_SECRET` si se guardó en archivos locales).
 
