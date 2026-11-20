@@ -841,7 +841,8 @@ main {
   border-bottom: 1px solid var(--line-soft);
 }
 
-.space-card-media img {
+.space-card-media img,
+.rail-plan img {
   display: block;
   width: 100%;
   height: auto;
@@ -1023,12 +1024,6 @@ main {
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--surface);
-}
-
-.rail-plan img {
-  display: block;
-  width: 100%;
-  height: auto;
 }
 
 .rail-plan figcaption {
