@@ -331,6 +331,10 @@ function updateRoomHeader() {
   detailImage.alt = meta.alt;
   detailImage.src = meta.image;
   $('detailSpaceCaption').textContent = meta.caption;
+  const roomInfo = document.querySelector(`.space-card [data-room-info="${state.selectedRoom}"]`);
+  const detailInfo = $('detailSpaceInfo');
+  detailInfo.href = roomInfo.href;
+  detailInfo.setAttribute('aria-label', roomInfo.getAttribute('aria-label'));
   document.title = `${meta.name} · PoliSocioLAB (UGR)`;
 }
 

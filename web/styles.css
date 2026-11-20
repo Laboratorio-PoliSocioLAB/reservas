@@ -883,6 +883,19 @@ main {
   color: var(--muted);
 }
 
+.space-info-link {
+  align-self: flex-start;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.gate-space-copy .space-info-link,
+.rail-plan .space-info-link {
+  display: block;
+  margin-top: 0.25rem;
+}
+
 .space-card-foot {
   margin-top: auto;
   padding-top: 1rem;
