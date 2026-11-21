@@ -177,8 +177,7 @@ function openCancelDialog(booking) {
 function openDeleteBlockDialog(block) {
   const dialog = $('deleteBlockDialog');
   dialog.returnValue = '';
-  $('deleteBlockMeta').textContent =
-    `${TARGET_LABELS[block.target] || block.target} · ${formatDateShortEs(block.block_date)} (${shortTime(block.start_time)}–${shortTime(block.end_time)})`;
+  $('deleteBlockMeta').textContent = formatBlockLabel(block);
 
   return new Promise((resolve) => {
     const onClose = () => {
@@ -493,6 +492,14 @@ function renderHistory() {
   }
 }
 
+function formatBlockLabel(block) {
+  const count = block.seat_ids?.length ?? 0;
+  const target = count
+    ? `${RESOURCE_LABELS.CUALITATIVO2} (${count} ${count === 1 ? 'plaza' : 'plazas'})`
+    : TARGET_LABELS[block.target] || block.target;
+  return `${target} · ${formatDateShortEs(block.block_date)} (${shortTime(block.start_time)}–${shortTime(block.end_time)})`;
+}
+
 async function renderBlocks() {
   const box = $('blocksList');
   const today = formatMadridToday();
@@ -531,7 +538,7 @@ async function renderBlocks() {
     const copy = document.createElement('div');
     copy.className = 'block-row-copy';
     const title = document.createElement('strong');
-    title.textContent = `${TARGET_LABELS[bl.target] || bl.target} · ${formatDateShortEs(bl.block_date)} (${shortTime(bl.start_time)}–${shortTime(bl.end_time)})`;
+    title.textContent = formatBlockLabel(bl);
     const sub = document.createElement('span');
     sub.className = 'muted';
     sub.textContent = bl.reason || 'Sin motivo especificado';
@@ -699,6 +706,15 @@ $('blockStart').addEventListener('change', validateBlockTimes);
 $('blockEnd').addEventListener('change', validateBlockTimes);
 $('blockEnd').addEventListener('input', () => $('blockEnd').setCustomValidity(''));
 
+function updateBlockSeatsField() {
+  const partialCapacity = $('blockTarget').value === 'CUALITATIVO2';
+  $('blockSeatsField').hidden = !partialCapacity;
+  $('blockSeats').disabled = !partialCapacity;
+}
+
+$('blockTarget').addEventListener('change', updateBlockSeatsField);
+updateBlockSeatsField();
+
 $('blockForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   validateBlockTimes();
@@ -713,18 +729,29 @@ $('blockForm').addEventListener('submit', async (e) => {
   }
 
   const btn = $('addBlockBtn');
+  if (btn.disabled) return;
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
   const prevText = btn.textContent;
   btn.textContent = 'Guardando…';
-  const { error } = await supabase.from('blocks').insert({
+  const payload = {
     target: $('blockTarget').value,
     block_date: $('blockDate').value,
     start_time: $('blockStart').value,
     end_time: $('blockEnd').value,
     reason: $('blockReason').value.trim(),
     created_by: currentUserEmail,
-  });
+  };
+  const seatCount = Number($('blockSeats').value);
+  const { error } = payload.target === 'CUALITATIVO2' && seatCount < 10
+    ? await supabase.rpc('create_cualitativo2_seat_block', {
+        p_count: seatCount,
+        p_date: payload.block_date,
+        p_start: payload.start_time,
+        p_end: payload.end_time,
+        p_reason: payload.reason,
+      })
+    : await supabase.from('blocks').insert(payload);
   btn.disabled = false;
   btn.removeAttribute('aria-busy');
   btn.textContent = prevText;
