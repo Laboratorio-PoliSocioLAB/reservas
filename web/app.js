@@ -188,6 +188,7 @@ const state = {
   userName: '',
   showingBookings: initialUrl.showingBookings,
   bookingsLoadSeq: 0,
+  staffCheckSeq: 0,
 };
 
 function syncUrlState({ push = false } = {}) {
@@ -248,6 +249,7 @@ function showAuthGate(message = '', kind = 'info') {
   state.userEmail = '';
   state.userName = '';
   $('topbarSession').hidden = true;
+  hideStaffLink();
   state.canRequestWholeRoom = false;
   $('authGate').hidden = false;
   $('spacePicker').hidden = true;
@@ -771,7 +773,18 @@ async function loadMyBookings({ append = false } = {}) {
   }
 }
 
-async function syncAuthSession(session) {
+function hideStaffLink() {
+  state.staffCheckSeq++;
+  $('staffPanelLink').hidden = true;
+}
+
+async function refreshStaffLink() {
+  const seq = ++state.staffCheckSeq;
+  const { data, error } = await supabase.rpc('is_staff', {}, { get: true });
+  if (seq === state.staffCheckSeq) $('staffPanelLink').hidden = Boolean(error) || data !== true;
+}
+
+async function syncAuthSession(session, { recheckStaff = false } = {}) {
   if (demoMode) {
     showAppForUser('demo@go.ugr.es', 'Usuario demo');
     await (state.showingBookings ? loadMyBookings() : loadDay(state.date || ''));
@@ -785,6 +798,7 @@ async function syncAuthSession(session) {
 
   const email = session.user.email.trim().toLowerCase();
   if (!isValidGoUgrEmail(email)) {
+    hideStaffLink();
     await supabase.auth.signOut();
     showAuthGate(
       `La cuenta ${email} no pertenece al dominio @go.ugr.es. Cierra sesión en Google o selecciona tu cuenta institucional de la UGR (@go.ugr.es).`,
@@ -798,6 +812,7 @@ async function syncAuthSession(session) {
   const sameUser = state.userEmail === email && $('authGate').hidden;
 
   if (!sameUser) {
+    hideStaffLink();
     clearMyBookings();
     if (sessionStorage.getItem('polisociolab-open-bookings') === '1') {
       sessionStorage.removeItem('polisociolab-open-bookings');
@@ -806,6 +821,7 @@ async function syncAuthSession(session) {
     }
   }
   showAppForUser(email, fullName, avatarUrl);
+  if (!sameUser || recheckStaff) refreshStaffLink();
   if (!sameUser) {
     if (state.showingBookings) setStatus('');
     await (state.showingBookings ? loadMyBookings() : loadDay(state.date || ''));
@@ -1036,8 +1052,8 @@ initAccessibleValidation();
 if (demoMode) {
   syncAuthSession(null);
 } else {
-  supabase.auth.onAuthStateChange((_event, session) => {
-    syncAuthSession(session);
+  supabase.auth.onAuthStateChange((event, session) => {
+    syncAuthSession(session, { recheckStaff: event === 'TOKEN_REFRESHED' });
   });
   supabase.auth.getSession().then(({ data: { session } }) => {
     syncAuthSession(session);
