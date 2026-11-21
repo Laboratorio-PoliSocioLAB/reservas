@@ -32,6 +32,7 @@ const supabase = demoMode
     });
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const BOOKINGS_PAGE_SIZE = 12;
 
 const SPACE_META = {
   RADIO: {
@@ -184,6 +185,7 @@ const state = {
   loadSeq: 0,
   userEmail: '',
   userName: '',
+  bookingsLoadSeq: 0,
 };
 
 function syncUrlState({ push = false } = {}) {
@@ -248,6 +250,7 @@ function showAuthGate(message = '', kind = 'info') {
   $('appContent').hidden = true;
   document.title = 'Reservas de laboratorios · PoliSocioLAB (UGR)';
   if ($('requestDialog').open) $('requestDialog').close();
+  if ($('myBookingsDialog').open) $('myBookingsDialog').close();
   setStatus(message, kind);
 }
 
@@ -630,6 +633,80 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
   }
 }
 
+function renderMyBooking(booking) {
+  const row = document.createElement('li');
+  const details = document.createElement('div');
+  const room = document.createElement('strong');
+  room.textContent = RESOURCE_LABELS[booking.resource_id] || booking.resource_id;
+  const schedule = document.createElement('p');
+  schedule.className = 'dialog-meta';
+  schedule.textContent = `${formatDateShortEs(booking.booking_date)} · ${booking.start_time.slice(0, 5)}–${booking.end_time.slice(0, 5)}`;
+  details.append(room, schedule);
+
+  const status = document.createElement('span');
+  status.className = 'status-tag';
+  status.dataset.state = booking.status;
+  status.textContent = booking.status[0] + booking.status.slice(1).toLowerCase();
+  row.append(details, status);
+  return row;
+}
+
+async function loadMyBookings({ append = false } = {}) {
+  const seq = ++state.bookingsLoadSeq;
+  const email = state.userEmail;
+  const dialog = $('myBookingsDialog');
+  const list = $('myBookingsList');
+  const message = $('myBookingsStatus');
+  const more = $('moreBookingsBtn');
+  const refresh = $('refreshBookingsBtn');
+  const offset = append ? list.childElementCount : 0;
+  if (!append) {
+    list.replaceChildren();
+    more.hidden = true;
+  }
+  message.textContent = 'Cargando tus reservas…';
+  more.disabled = true;
+  refresh.disabled = true;
+  const isCurrent = () => seq === state.bookingsLoadSeq && dialog.open && state.userEmail === email;
+
+  try {
+    let bookings;
+    if (demoMode) {
+      bookings = demoState.bookings
+        .filter((booking) => booking.ownRequest)
+        .sort((a, b) => b.date.localeCompare(a.date) || b.start.localeCompare(a.start))
+        .slice(offset, offset + BOOKINGS_PAGE_SIZE + 1)
+        .map(({ resource_id, date, start, end, status }) => ({
+          resource_id, booking_date: date, start_time: start, end_time: end, status,
+        }));
+    } else {
+      const { data, error } = await supabase.rpc('get_my_bookings', {}, { get: true })
+        .order('booking_date', { ascending: false })
+        .order('start_time', { ascending: false })
+        .order('id')
+        .range(offset, offset + BOOKINGS_PAGE_SIZE);
+      if (error) throw error;
+      bookings = data;
+    }
+    if (!isCurrent()) return;
+
+    list.append(...bookings.slice(0, BOOKINGS_PAGE_SIZE).map(renderMyBooking));
+    if (append) list.children[offset]?.scrollIntoView({ block: 'nearest' });
+    more.hidden = bookings.length <= BOOKINGS_PAGE_SIZE;
+    message.textContent = list.childElementCount
+      ? `${list.childElementCount} ${list.childElementCount === 1 ? 'solicitud visible' : 'solicitudes visibles'}.`
+      : 'Todavía no tienes solicitudes de reserva.';
+  } catch {
+    if (!isCurrent()) return;
+    message.textContent = 'No se pudieron cargar tus reservas. Vuelve a intentarlo.';
+  } finally {
+    if (isCurrent()) {
+      more.disabled = false;
+      refresh.disabled = false;
+    }
+  }
+}
+
 async function syncAuthSession(session) {
   if (demoMode) {
     showAppForUser('demo@go.ugr.es', 'Usuario demo');
@@ -656,6 +733,7 @@ async function syncAuthSession(session) {
   const avatarUrl = getSafeGoogleAvatarUrl(session.user);
   const sameUser = state.userEmail === email && $('authGate').hidden;
 
+  if (!sameUser && $('myBookingsDialog').open) $('myBookingsDialog').close();
   showAppForUser(email, fullName, avatarUrl);
   if (!sameUser) {
     await loadDay(state.date || '');
@@ -688,6 +766,18 @@ async function signInWithGoogle() {
 }
 
 $('googleLoginBtn').addEventListener('click', signInWithGoogle);
+
+$('myBookingsBtn').addEventListener('click', () => {
+  $('myBookingsDialog').showModal();
+  loadMyBookings();
+});
+$('refreshBookingsBtn').addEventListener('click', () => loadMyBookings());
+$('moreBookingsBtn').addEventListener('click', () => loadMyBookings({ append: true }));
+$('myBookingsDialog').addEventListener('close', () => {
+  if ($('myBookingsDialog').open) return;
+  $('myBookingsList').replaceChildren();
+  $('myBookingsStatus').textContent = '';
+});
 
 $('logoutBtn').addEventListener('click', async () => {
   if (demoMode) {
@@ -798,6 +888,7 @@ $('requestForm').addEventListener('submit', async (event) => {
       };
       demoState.bookings.push({
         id: created.id,
+        ownRequest: true,
         resource_id: assigned,
         date: slot.date,
         start: slot.start,
@@ -823,7 +914,7 @@ $('requestForm').addEventListener('submit', async (event) => {
     await Promise.all([
       loadDay(
         slot.date,
-        `Solicitud enviada (${created.resource_label}, ${formatDateShortEs(created.date)} · ${created.start}–${created.end}). Queda pendiente de revisión y recibirás confirmación en ${targetEmail}. Ref.: ${created.id}`,
+        `Solicitud enviada (${created.resource_label}, ${formatDateShortEs(created.date)} · ${created.start}–${created.end}). Queda pendiente de revisión. Puedes seguir su estado en «Mis reservas». Recibirás el aviso en ${targetEmail}. Ref.: ${created.id}`,
         'ok'
       ),
       notifyPromise,

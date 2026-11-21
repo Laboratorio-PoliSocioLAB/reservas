@@ -1722,6 +1722,28 @@ dialog::backdrop {
   border-top: 1px solid var(--line-soft);
 }
 
+.my-bookings-list {
+  list-style: none;
+  padding: 0 0.25rem 0 0;
+  margin: 0;
+  max-block-size: min(50dvh, 27rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.my-bookings-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+  padding: 0.8rem 0;
+}
+
+.my-bookings-list li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
 /* ==========================================================================
    Pie institucional
    ========================================================================== */

@@ -11,6 +11,7 @@ Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de C
 - **Horario configurable:** por defecto lunes a viernes de **08:00 a 21:00**, reservas de **1 a 6 horas consecutivas**.
 - **Acceso exclusivo con Google `@go.ugr.es`:** tanto el portal de reservas como el panel de gestión exigen inicio de sesión con Google Workspace institucional `@go.ugr.es` mediante OAuth **PKCE**, verificado en base de datos (`amr = oauth`, identidad Google confirmada en `auth.identities`, nombre inmutable y correo confirmado).
 - **Aprobación manual y protección contra dobles reservas:** panel privado (`/admin.html`) para el personal de la Facultad con restricción `EXCLUDE USING gist` en PostgreSQL, bloqueos transaccionales anti-TOCTOU y gestión de bloqueos de mantenimiento.
+- **Mis reservas:** cada cuenta institucional puede consultar las fechas, los horarios y los estados de sus propias solicitudes.
 - **Avisos automáticos por correo:**
   - `notify-new-request`: avisa al personal cuando entra una nueva solicitud pendiente.
   - `notify-booking`: envía confirmación (con archivo `.ics` saneado según RFC 5545), rechazo o cancelación al solicitante.
@@ -25,7 +26,7 @@ Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de C
 - `web/privacidad.html` — Política de privacidad (RGPD / LOPDGDD).
 - `web/config.js` — Conexión pública al proyecto Supabase (`SUPABASE_URL` y `SUPABASE_ANON_KEY`).
 - `web/vendor/supabase-js.mjs` — Cliente Supabase fijado localmente (sin carga desde CDN externo).
-- `supabase/migrations/001_*.sql` … `008_cualitativo2_docencia.sql` — Esquema, políticas RLS, restricción anti-solapamiento y endurecimiento de seguridad.
+- `supabase/migrations/001_*.sql` … `009_my_bookings.sql` — Esquema, políticas RLS, restricción anti-solapamiento y consulta privada de reservas.
 - `supabase/functions/notify-booking/index.ts` — Edge Function de avisos de resolución con adjunto `.ics`.
 - `supabase/functions/notify-new-request/index.ts` — Edge Function de aviso al personal ante nuevas solicitudes.
 - `supabase/mail-relay/Code.gs` — Puente de correo endurecido para Google Apps Script (comparación en tiempo constante, lista blanca de asuntos y límite de envíos por minuto).
@@ -36,7 +37,7 @@ Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de C
 ## Despliegue y lista de comprobación de seguridad
 
 ### 1. Base de datos (Supabase SQL Editor o CLI)
-Aplica las migraciones en orden (`001` a `008`). En concreto, `007_security_hardening.sql`:
+Aplica las migraciones en orden (`001` a `009`). Aplica `009_my_bookings.sql` antes de publicar la versión del portal con «Mis reservas». En concreto, `007_security_hardening.sql`:
 - Endurece `is_verified_go_ugr_user()`, `is_staff()` y crea `is_admin()` exigiendo sesión Google OAuth (`amr = oauth`) e identidad verificada en `auth.identities`.
 - Revoca el acceso RPC a `has_resource_conflict` y `range_within_opening_hours` para `PUBLIC`, `anon` y `authenticated`.
 - Aplica mínimo privilegio en RLS (elimina `bookings_staff_update`, exige `is_admin()` para modificar `resources`/`opening_hours`, audita `blocks.created_by` mediante trigger).

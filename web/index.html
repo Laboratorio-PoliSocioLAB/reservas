@@ -9,7 +9,7 @@
   <title>Reservas de laboratorios · PoliSocioLAB (UGR)</title>
   <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
   <link rel="preload" href="assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=fotos-4x3">
+  <link rel="stylesheet" href="styles.css?v=mis-reservas">
 </head>
 <body>
   <a href="#mainContent" class="skip-link visually-hidden">Saltar al contenido principal</a>
@@ -43,6 +43,7 @@
             <small id="sessionEmail" translate="no"></small>
           </div>
         </div>
+        <button id="myBookingsBtn" type="button" class="topbar-btn" aria-haspopup="dialog">Mis reservas</button>
         <button id="logoutBtn" type="button" class="topbar-btn">Cerrar sesión</button>
       </div>
     </div>
@@ -312,6 +313,21 @@
     </div>
   </footer>
 
+  <dialog id="myBookingsDialog" closedby="any" aria-labelledby="myBookingsTitle">
+    <div class="dialog-head">
+      <h2 id="myBookingsTitle">Mis reservas</h2>
+    </div>
+    <p id="myBookingsStatus" class="dialog-meta" role="status"></p>
+    <ul id="myBookingsList" class="my-bookings-list" role="list"></ul>
+    <div class="dialog-actions">
+      <button id="moreBookingsBtn" type="button" hidden>Ver más</button>
+      <button id="refreshBookingsBtn" type="button">Actualizar</button>
+      <form method="dialog">
+        <button type="submit" autofocus>Cerrar</button>
+      </form>
+    </div>
+  </dialog>
+
   <!-- Diálogo modal nativo de solicitud -->
   <dialog id="requestDialog" closedby="any" aria-labelledby="requestTitle">
     <div class="dialog-head">
@@ -369,6 +385,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="app.js?v=fichas-sin-horario"></script>
+  <script type="module" src="app.js?v=mis-reservas"></script>
 </body>
 </html>
