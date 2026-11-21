@@ -249,6 +249,7 @@ function showAuthGate(message = '', kind = 'info') {
   state.userEmail = '';
   state.userName = '';
   $('topbarSession').hidden = true;
+  $('accountMenu').open = false;
   hideStaffLink();
   state.canRequestWholeRoom = false;
   $('authGate').hidden = false;
@@ -873,13 +874,28 @@ $('bookingsState').addEventListener('change', () => loadMyBookings());
 $('refreshBookingsBtn').addEventListener('click', () => loadMyBookings());
 $('moreBookingsBtn').addEventListener('click', () => loadMyBookings({ append: true }));
 
+const accountMenu = $('accountMenu');
+document.addEventListener('click', (event) => {
+  if (accountMenu.open && !accountMenu.contains(event.target)) accountMenu.open = false;
+});
+accountMenu.addEventListener('focusout', (event) => {
+  if (event.relatedTarget && !accountMenu.contains(event.relatedTarget)) accountMenu.open = false;
+});
+accountMenu.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || !accountMenu.open) return;
+  accountMenu.open = false;
+  accountMenu.querySelector('summary').focus();
+});
+
 $('logoutBtn').addEventListener('click', async () => {
+  accountMenu.open = false;
   if (demoMode) {
     setStatus('Estás en modo demostración local. Conecta Supabase en web/config.js para iniciar sesión real con @go.ugr.es.', 'info');
     return;
   }
   await supabase.auth.signOut();
   showAuthGate('Has cerrado sesión. Puedes volver a entrar con tu cuenta @go.ugr.es.', 'info');
+  $('googleLoginBtn').focus();
 });
 
 for (const btn of document.querySelectorAll('[data-pick-room]')) {

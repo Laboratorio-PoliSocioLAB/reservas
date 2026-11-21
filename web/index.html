@@ -9,7 +9,7 @@
   <title>Reservas de laboratorios · PoliSocioLAB (UGR)</title>
   <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
   <link rel="preload" href="assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=escritorio-amplio">
+  <link rel="stylesheet" href="styles.css?v=menu-cuenta">
 </head>
 <body class="booking-portal">
   <a href="#mainContent" class="skip-link visually-hidden">Saltar al contenido principal</a>
@@ -34,20 +34,24 @@
       </div>
 
       <div id="topbarSession" class="topbar-actions" hidden>
-        <div class="session-identity">
-          <span id="sessionAvatarSlot" class="user-avatar-slot">
-            <span id="sessionAvatarFallback" class="user-avatar-fallback" aria-hidden="true"></span>
-          </span>
-          <div class="session-text">
-            <strong id="sessionName"></strong>
-            <small id="sessionEmail" translate="no"></small>
-          </div>
-        </div>
-        <div class="session-controls">
+        <nav class="session-controls" aria-label="Navegación de reservas">
           <a id="myBookingsLink" href="?vista=mis-reservas" class="topbar-btn">Mis reservas</a>
-          <a id="staffPanelLink" href="admin.html" class="topbar-btn" hidden>Panel de gestión</a>
-          <button id="logoutBtn" type="button" class="topbar-btn">Cerrar sesión</button>
-        </div>
+          <a id="staffPanelLink" href="admin.html" class="topbar-btn staff-nav-link" hidden>Panel de gestión</a>
+        </nav>
+        <details id="accountMenu" class="account-menu">
+          <summary class="session-identity account-toggle" aria-label="Opciones de la cuenta">
+            <span id="sessionAvatarSlot" class="user-avatar-slot">
+              <span id="sessionAvatarFallback" class="user-avatar-fallback" aria-hidden="true"></span>
+            </span>
+            <span class="session-text">
+              <strong id="sessionName"></strong>
+              <small id="sessionEmail" translate="no"></small>
+            </span>
+          </summary>
+          <div class="account-menu-panel">
+            <button id="logoutBtn" type="button" class="danger">Cerrar sesión</button>
+          </div>
+        </details>
       </div>
     </div>
   </header>
@@ -416,6 +420,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="app.js?v=acceso-gestion"></script>
+  <script type="module" src="app.js?v=menu-cuenta"></script>
 </body>
 </html>

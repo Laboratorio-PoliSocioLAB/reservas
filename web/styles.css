@@ -397,6 +397,70 @@ code {
   outline-offset: 2px;
 }
 
+.staff-nav-link {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.23em;
+}
+
+.account-menu {
+  position: relative;
+  min-width: 10rem;
+  max-width: 100%;
+}
+
+.account-toggle {
+  min-height: 2.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  list-style: none;
+  cursor: pointer;
+}
+
+.account-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.account-toggle::after {
+  content: "";
+  width: 0.48rem;
+  height: 0.48rem;
+  flex-shrink: 0;
+  margin: -0.2rem 0.15rem 0 auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.account-toggle:hover,
+.account-menu[open] .account-toggle {
+  background: rgb(23 27 32 / 0.18);
+}
+
+.account-menu[open] .account-toggle::after {
+  transform: translateY(0.2rem) rotate(225deg);
+}
+
+.account-toggle:focus-visible {
+  outline-color: #FFFFFF;
+}
+
+.account-menu-panel {
+  position: absolute;
+  inset-block-start: calc(100% + 0.35rem);
+  inset-inline-end: 0;
+  min-width: 10rem;
+  padding: 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.account-menu-panel button {
+  width: 100%;
+}
+
 /* ==========================================================================
    Controles base (estándar Operate)
    ========================================================================== */
@@ -2064,6 +2128,11 @@ dialog::backdrop {
 
   .topbar {
     position: static;
+  }
+
+  .account-menu-panel {
+    position: static;
+    margin-block-start: 0.35rem;
   }
 
   .faculty-logo {
