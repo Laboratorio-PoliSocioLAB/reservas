@@ -168,6 +168,7 @@ function readInitialUrlParams() {
   return {
     room: room && SPACE_META[room] ? room : '',
     date: date && ISO_DATE_RE.test(date) ? date : '',
+    showingBookings: params.get('vista') === 'mis-reservas',
   };
 }
 
@@ -185,6 +186,7 @@ const state = {
   loadSeq: 0,
   userEmail: '',
   userName: '',
+  showingBookings: initialUrl.showingBookings,
   bookingsLoadSeq: 0,
 };
 
@@ -192,7 +194,9 @@ function syncUrlState({ push = false } = {}) {
   const current = new URLSearchParams(window.location.search);
   if (current.has('code') || current.has('error')) return;
   const next = new URLSearchParams();
-  if (state.selectedRoom) {
+  if (state.showingBookings) {
+    next.set('vista', 'mis-reservas');
+  } else if (state.selectedRoom) {
     next.set('room', state.selectedRoom);
     if (state.date) next.set('date', state.date);
   }
@@ -248,15 +252,28 @@ function showAuthGate(message = '', kind = 'info') {
   $('authGate').hidden = false;
   $('spacePicker').hidden = true;
   $('appContent').hidden = true;
+  $('myBookingsPanel').hidden = true;
+  $('myBookingsLink').removeAttribute('aria-current');
+  clearMyBookings();
   document.title = 'Reservas de laboratorios · PoliSocioLAB (UGR)';
   if ($('requestDialog').open) $('requestDialog').close();
-  if ($('myBookingsDialog').open) $('myBookingsDialog').close();
   setStatus(message, kind);
 }
 
 function renderActiveView({ focusHeading = false } = {}) {
   const hasRoom = Boolean(state.selectedRoom && SPACE_META[state.selectedRoom]);
   $('authGate').hidden = true;
+  $('myBookingsPanel').hidden = !state.showingBookings;
+  const bookingsLink = $('myBookingsLink');
+  if (state.showingBookings) {
+    bookingsLink.setAttribute('aria-current', 'page');
+    $('spacePicker').hidden = true;
+    $('appContent').hidden = true;
+    document.title = 'Mis reservas · PoliSocioLAB (UGR)';
+    if (focusHeading) $('myBookingsTitle').focus();
+    return;
+  }
+  bookingsLink.removeAttribute('aria-current');
   $('spacePicker').hidden = hasRoom;
   $('appContent').hidden = !hasRoom;
 
@@ -516,6 +533,8 @@ function selectRoom(roomKey, { pushHistory = false, focusHeading = false } = {})
 }
 
 function showSpacePicker({ pushHistory = true, focusHeading = true } = {}) {
+  if (state.showingBookings) clearMyBookings();
+  state.showingBookings = false;
   state.selectedRoom = '';
   renderActiveView({ focusHeading });
   syncUrlState({ push: pushHistory });
@@ -612,7 +631,7 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
       renderSelectedRoomSlots();
     }
     syncUrlState();
-    setStatus(bannerMessage, bannerKind);
+    if (!state.showingBookings) setStatus(bannerMessage, bannerKind);
   } catch (err) {
     if (seq !== state.loadSeq) return;
     $('spaceSlots').replaceChildren();
@@ -629,78 +648,123 @@ async function loadDay(date, bannerMessage = '', bannerKind = 'ok') {
     retry.addEventListener('click', () => loadDay(date));
     empty.append(title, msg, retry);
     $('spaceSlots').appendChild(empty);
-    setStatus('No se pudo cargar la disponibilidad. Comprueba tu conexión y pulsa «Actualizar».', 'error');
+    if (!state.showingBookings) {
+      setStatus('No se pudo cargar la disponibilidad. Comprueba tu conexión y pulsa «Actualizar».', 'error');
+    }
   }
 }
 
 function renderMyBooking(booking) {
   const row = document.createElement('li');
-  const details = document.createElement('div');
+  row.className = 'bookings-grid';
   const room = document.createElement('strong');
   room.textContent = RESOURCE_LABELS[booking.resource_id] || booking.resource_id;
-  const schedule = document.createElement('p');
-  schedule.className = 'dialog-meta';
-  schedule.textContent = `${formatDateShortEs(booking.booking_date)} · ${booking.start_time.slice(0, 5)}–${booking.end_time.slice(0, 5)}`;
-  details.append(room, schedule);
+  const schedule = document.createElement('div');
+  const date = document.createElement('time');
+  date.className = 'booking-date';
+  date.dateTime = booking.booking_date;
+  date.textContent = formatDateShortEs(booking.booking_date);
+  const hours = document.createElement('span');
+  hours.className = 'booking-hours';
+  hours.textContent = `${booking.start_time.slice(0, 5)}–${booking.end_time.slice(0, 5)}`;
+  schedule.append(date, hours);
 
   const status = document.createElement('span');
   status.className = 'status-tag';
   status.dataset.state = booking.status;
   status.textContent = booking.status[0] + booking.status.slice(1).toLowerCase();
-  row.append(details, status);
+  row.append(room, schedule, status);
   return row;
+}
+
+function clearMyBookings() {
+  state.bookingsLoadSeq++;
+  const list = $('myBookingsList');
+  list.replaceChildren();
+  list.removeAttribute('aria-busy');
+  $('myBookingsStatus').textContent = '';
+  $('myBookingsColumns').hidden = true;
+  $('myBookingsPagination').hidden = true;
 }
 
 async function loadMyBookings({ append = false } = {}) {
   const seq = ++state.bookingsLoadSeq;
   const email = state.userEmail;
-  const dialog = $('myBookingsDialog');
   const list = $('myBookingsList');
+  const columns = $('myBookingsColumns');
   const message = $('myBookingsStatus');
+  const pagination = $('myBookingsPagination');
   const more = $('moreBookingsBtn');
   const refresh = $('refreshBookingsBtn');
+  const period = $('bookingsPeriod').value;
+  const status = $('bookingsState').value;
+  const today = formatMadridToday();
+  const ascending = period === 'upcoming';
   const offset = append ? list.childElementCount : 0;
   if (!append) {
     list.replaceChildren();
-    more.hidden = true;
+    columns.hidden = true;
+    pagination.hidden = true;
   }
   message.textContent = 'Cargando tus reservas…';
+  list.setAttribute('aria-busy', 'true');
   more.disabled = true;
   refresh.disabled = true;
-  const isCurrent = () => seq === state.bookingsLoadSeq && dialog.open && state.userEmail === email;
+  const isCurrent = () => seq === state.bookingsLoadSeq && state.showingBookings && state.userEmail === email;
 
   try {
     let bookings;
+    let count;
     if (demoMode) {
-      bookings = demoState.bookings
+      const matching = demoState.bookings
         .filter((booking) => booking.ownRequest)
-        .sort((a, b) => b.date.localeCompare(a.date) || b.start.localeCompare(a.start))
-        .slice(offset, offset + BOOKINGS_PAGE_SIZE + 1)
+        .filter((booking) => !status || booking.status === status)
+        .filter((booking) => !period || (ascending ? booking.date >= today : booking.date < today))
+        .sort((a, b) => (ascending ? 1 : -1) * (a.date.localeCompare(b.date) || a.start.localeCompare(b.start)));
+      count = matching.length;
+      bookings = matching.slice(offset, offset + BOOKINGS_PAGE_SIZE)
         .map(({ resource_id, date, start, end, status }) => ({
           resource_id, booking_date: date, start_time: start, end_time: end, status,
         }));
     } else {
-      const { data, error } = await supabase.rpc('get_my_bookings', {}, { get: true })
-        .order('booking_date', { ascending: false })
-        .order('start_time', { ascending: false })
+      let query = supabase.rpc('get_my_bookings', {}, { get: true, count: 'exact' });
+      if (status) query = query.eq('status', status);
+      if (period === 'upcoming') query = query.gte('booking_date', today);
+      if (period === 'past') query = query.lt('booking_date', today);
+      const result = await query
+        .order('booking_date', { ascending })
+        .order('start_time', { ascending })
         .order('id')
-        .range(offset, offset + BOOKINGS_PAGE_SIZE);
-      if (error) throw error;
-      bookings = data;
+        .range(offset, offset + BOOKINGS_PAGE_SIZE - 1);
+      if (result.error) throw result.error;
+      bookings = result.data;
+      count = result.count;
     }
     if (!isCurrent()) return;
 
-    list.append(...bookings.slice(0, BOOKINGS_PAGE_SIZE).map(renderMyBooking));
-    if (append) list.children[offset]?.scrollIntoView({ block: 'nearest' });
-    more.hidden = bookings.length <= BOOKINGS_PAGE_SIZE;
-    message.textContent = list.childElementCount
-      ? `${list.childElementCount} ${list.childElementCount === 1 ? 'solicitud visible' : 'solicitudes visibles'}.`
-      : 'Todavía no tienes solicitudes de reserva.';
+    list.append(...bookings.map(renderMyBooking));
+    const shown = list.childElementCount;
+    columns.hidden = !shown;
+    pagination.hidden = !bookings.length || shown >= count;
+    if (append && list.children[offset]) {
+      list.children[offset].tabIndex = -1;
+      list.children[offset].focus();
+    }
+    if (shown) {
+      message.textContent = shown < count
+        ? `${shown} de ${count} solicitudes`
+        : `${shown} ${shown === 1 ? 'solicitud' : 'solicitudes'}`;
+    } else {
+      message.textContent = period || status
+        ? 'No hay solicitudes que coincidan con estos filtros.'
+        : 'Todavía no tienes solicitudes de reserva.';
+    }
   } catch {
     if (!isCurrent()) return;
     message.textContent = 'No se pudieron cargar tus reservas. Vuelve a intentarlo.';
   } finally {
     if (isCurrent()) {
+      list.removeAttribute('aria-busy');
       more.disabled = false;
       refresh.disabled = false;
     }
@@ -710,7 +774,7 @@ async function loadMyBookings({ append = false } = {}) {
 async function syncAuthSession(session) {
   if (demoMode) {
     showAppForUser('demo@go.ugr.es', 'Usuario demo');
-    await loadDay(state.date || '');
+    await (state.showingBookings ? loadMyBookings() : loadDay(state.date || ''));
     return;
   }
 
@@ -733,10 +797,18 @@ async function syncAuthSession(session) {
   const avatarUrl = getSafeGoogleAvatarUrl(session.user);
   const sameUser = state.userEmail === email && $('authGate').hidden;
 
-  if (!sameUser && $('myBookingsDialog').open) $('myBookingsDialog').close();
+  if (!sameUser) {
+    clearMyBookings();
+    if (sessionStorage.getItem('polisociolab-open-bookings') === '1') {
+      sessionStorage.removeItem('polisociolab-open-bookings');
+      state.showingBookings = true;
+      syncUrlState();
+    }
+  }
   showAppForUser(email, fullName, avatarUrl);
   if (!sameUser) {
-    await loadDay(state.date || '');
+    if (state.showingBookings) setStatus('');
+    await (state.showingBookings ? loadMyBookings() : loadDay(state.date || ''));
   }
 }
 
@@ -746,6 +818,7 @@ async function signInWithGoogle() {
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
   setStatus('Redirigiendo a Google (@go.ugr.es)…', 'info');
+  if (state.showingBookings) sessionStorage.setItem('polisociolab-open-bookings', '1');
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -759,6 +832,7 @@ async function signInWithGoogle() {
   });
 
   if (error) {
+    sessionStorage.removeItem('polisociolab-open-bookings');
     btn.disabled = false;
     btn.removeAttribute('aria-busy');
     setStatus(`No se pudo iniciar sesión con Google (${error.message}). Reinténtalo o comprueba tu conexión.`, 'error');
@@ -767,17 +841,21 @@ async function signInWithGoogle() {
 
 $('googleLoginBtn').addEventListener('click', signInWithGoogle);
 
-$('myBookingsBtn').addEventListener('click', () => {
-  $('myBookingsDialog').showModal();
+$('myBookingsLink').addEventListener('click', (event) => {
+  if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (state.showingBookings) return;
+  state.showingBookings = true;
+  syncUrlState({ push: true });
+  setStatus('');
+  renderActiveView({ focusHeading: true });
   loadMyBookings();
 });
+$('newBookingBtn').addEventListener('click', () => showSpacePicker());
+$('bookingsPeriod').addEventListener('change', () => loadMyBookings());
+$('bookingsState').addEventListener('change', () => loadMyBookings());
 $('refreshBookingsBtn').addEventListener('click', () => loadMyBookings());
 $('moreBookingsBtn').addEventListener('click', () => loadMyBookings({ append: true }));
-$('myBookingsDialog').addEventListener('close', () => {
-  if ($('myBookingsDialog').open) return;
-  $('myBookingsList').replaceChildren();
-  $('myBookingsStatus').textContent = '';
-});
 
 $('logoutBtn').addEventListener('click', async () => {
   if (demoMode) {
@@ -812,13 +890,19 @@ if (brandLink) {
 }
 
 window.addEventListener('popstate', () => {
-  if (!state.userEmail) return;
   const next = readInitialUrlParams();
+  const changedView = state.showingBookings !== next.showingBookings;
+  if (changedView && !next.showingBookings) clearMyBookings();
+  state.showingBookings = next.showingBookings;
   state.selectedRoom = next.room;
-  if (next.date && next.date !== state.date) {
-    loadDay(clampDate(next.date));
+  if (!state.userEmail) return;
+  renderActiveView({ focusHeading: changedView });
+  if (state.showingBookings) {
+    setStatus('');
+    if (changedView) loadMyBookings();
+  } else if ((next.date && next.date !== state.date) || (!state.date && next.room)) {
+    loadDay(next.date ? clampDate(next.date) : '');
   }
-  renderActiveView({ focusHeading: false });
 });
 
 $('purpose').addEventListener('input', updatePurposeCounter);

@@ -9,7 +9,7 @@
   <title>Reservas de laboratorios · PoliSocioLAB (UGR)</title>
   <meta name="description" content="Consulta la disponibilidad en tiempo real y solicita reservas en los laboratorios de PoliSocioLAB (Facultad de Ciencias Políticas y Sociología, UGR).">
   <link rel="preload" href="assets/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=mis-reservas">
+  <link rel="stylesheet" href="styles.css?v=panel-reservas">
 </head>
 <body>
   <a href="#mainContent" class="skip-link visually-hidden">Saltar al contenido principal</a>
@@ -43,8 +43,10 @@
             <small id="sessionEmail" translate="no"></small>
           </div>
         </div>
-        <button id="myBookingsBtn" type="button" class="topbar-btn" aria-haspopup="dialog">Mis reservas</button>
-        <button id="logoutBtn" type="button" class="topbar-btn">Cerrar sesión</button>
+        <div class="session-controls">
+          <a id="myBookingsLink" href="?vista=mis-reservas" class="topbar-btn">Mis reservas</a>
+          <button id="logoutBtn" type="button" class="topbar-btn">Cerrar sesión</button>
+        </div>
       </div>
     </div>
   </header>
@@ -170,6 +172,50 @@
             </div>
           </div>
         </article>
+      </div>
+    </section>
+
+    <section id="myBookingsPanel" class="picker-shell bookings-shell" aria-labelledby="myBookingsTitle" hidden>
+      <header class="picker-head">
+        <div class="picker-head-copy">
+          <h1 id="myBookingsTitle" tabindex="-1">Mis reservas</h1>
+          <p class="picker-lead">Consulta el estado y el historial de tus solicitudes.</p>
+        </div>
+        <button id="newBookingBtn" type="button" class="primary">Consultar disponibilidad</button>
+      </header>
+
+      <div class="bookings-sheet">
+        <div class="bookings-toolbar">
+          <div class="bookings-filter">
+            <label for="bookingsPeriod">Fecha del turno</label>
+            <select id="bookingsPeriod" autocomplete="off">
+              <option value="">Todas las fechas</option>
+              <option value="upcoming">Desde hoy</option>
+              <option value="past">Antes de hoy</option>
+            </select>
+          </div>
+          <div class="bookings-filter">
+            <label for="bookingsState">Estado</label>
+            <select id="bookingsState" autocomplete="off">
+              <option value="">Todos los estados</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="APROBADA">Aprobada</option>
+              <option value="RECHAZADA">Rechazada</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+          </div>
+          <div class="bookings-tools">
+            <p id="myBookingsStatus" class="bookings-status" role="status"></p>
+            <button id="refreshBookingsBtn" type="button">Actualizar</button>
+          </div>
+        </div>
+        <div id="myBookingsColumns" class="bookings-columns bookings-grid" aria-hidden="true" hidden>
+          <span>Laboratorio</span><span>Fecha y hora</span><span>Estado</span>
+        </div>
+        <ul id="myBookingsList" class="my-bookings-list" role="list" aria-label="Solicitudes de reserva"></ul>
+        <div id="myBookingsPagination" class="bookings-pagination" hidden>
+          <button id="moreBookingsBtn" type="button">Ver más solicitudes</button>
+        </div>
       </div>
     </section>
 
@@ -313,21 +359,6 @@
     </div>
   </footer>
 
-  <dialog id="myBookingsDialog" closedby="any" aria-labelledby="myBookingsTitle">
-    <div class="dialog-head">
-      <h2 id="myBookingsTitle">Mis reservas</h2>
-    </div>
-    <p id="myBookingsStatus" class="dialog-meta" role="status"></p>
-    <ul id="myBookingsList" class="my-bookings-list" role="list"></ul>
-    <div class="dialog-actions">
-      <button id="moreBookingsBtn" type="button" hidden>Ver más</button>
-      <button id="refreshBookingsBtn" type="button">Actualizar</button>
-      <form method="dialog">
-        <button type="submit" autofocus>Cerrar</button>
-      </form>
-    </div>
-  </dialog>
-
   <!-- Diálogo modal nativo de solicitud -->
   <dialog id="requestDialog" closedby="any" aria-labelledby="requestTitle">
     <div class="dialog-head">
@@ -385,6 +416,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="app.js?v=mis-reservas"></script>
+  <script type="module" src="app.js?v=panel-reservas"></script>
 </body>
 </html>

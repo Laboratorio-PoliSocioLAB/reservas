@@ -11,7 +11,7 @@ Sistema gratuito (0 €) de reservas para los laboratorios de la **Facultad de C
 - **Horario configurable:** por defecto lunes a viernes de **08:00 a 21:00**, reservas de **1 a 6 horas consecutivas**.
 - **Acceso exclusivo con Google `@go.ugr.es`:** tanto el portal de reservas como el panel de gestión exigen inicio de sesión con Google Workspace institucional `@go.ugr.es` mediante OAuth **PKCE**, verificado en base de datos (`amr = oauth`, identidad Google confirmada en `auth.identities`, nombre inmutable y correo confirmado).
 - **Aprobación manual y protección contra dobles reservas:** panel privado (`/admin.html`) para el personal de la Facultad con restricción `EXCLUDE USING gist` en PostgreSQL, bloqueos transaccionales anti-TOCTOU y gestión de bloqueos de mantenimiento.
-- **Mis reservas:** cada cuenta institucional puede consultar las fechas, los horarios y los estados de sus propias solicitudes.
+- **Mis reservas:** panel privado con el historial de solicitudes de la cuenta institucional, filtros de fecha y estado, y acceso a la disponibilidad.
 - **Avisos automáticos por correo:**
   - `notify-new-request`: avisa al personal cuando entra una nueva solicitud pendiente.
   - `notify-booking`: envía confirmación (con archivo `.ics` saneado según RFC 5545), rechazo o cancelación al solicitante.
