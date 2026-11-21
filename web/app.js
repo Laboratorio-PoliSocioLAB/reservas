@@ -56,7 +56,7 @@ const SPACE_META = {
   CUALITATIVO2: {
     name: ROOM_NAMES.CUALITATIVO2,
     subtitle: 'Aforo compartido de 10 plazas simultáneas.',
-    caption: '10 puestos individuales con asignación automática de plaza libre.',
+    caption: '10 puestos individuales.',
     image: 'assets/space-cualitativo2.webp',
     alt: 'Fila de puestos informáticos del Laboratorio cualitativo 2',
     width: 1440,
